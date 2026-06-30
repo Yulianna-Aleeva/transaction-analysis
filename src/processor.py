@@ -8,7 +8,7 @@ def load_transactions(file_path: str) -> pd.DataFrame:
         print(f"Загружено строк: {len(df)}.")
         return df
     except FileNotFoundError as e:
-        print(f"❌ Ошибка: Файл не найден. Проверьте путь к {file_path}.")
+        print(f"Ошибка: Файл не найден. Проверьте путь к {file_path}.")
         raise e
 
 
