@@ -39,8 +39,7 @@ def expenses_work_vs_weekend(df: pd.DataFrame) -> pd.DataFrame:
     """Сравнивает траты в рабочие дни и в выходные."""
     df = df.copy()
 
-    df["day_name"] = pd.to_datetime(df["date"], errors="coerce", dayfirst=True).dt.day_name()  # type: ignore
-    # Если выходные: "Суббота", "Воскресенье"
+    df["day_name"] = pd.to_datetime(df["date"], errors="coerce", dayfirst=True).dt.day_name()
     df["Тип дня"] = df["day_name"].apply(lambda x: "Выходной" if x in ["Saturday", "Sunday"] else "Рабочий день")
 
     result = (
