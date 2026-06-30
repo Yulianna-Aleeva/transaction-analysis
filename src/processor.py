@@ -21,7 +21,7 @@ def format_date_column(df: pd.DataFrame) -> pd.DataFrame:
     """Преобразует столбец "Дата операции" в формат "dd.mm.yyyy"."""
     df = df.copy()
 
-    df["date"] = pd.to_datetime(df["Дата операции"], errors="coerce", dayfirst=True)
-    df["date"] = df["date"].dt.strftime("%d.%m.%Y")
+    df["Дата операции"] = pd.to_datetime(df["Дата операции"], errors="coerce", dayfirst=True)
+    df["Дата операции"] = df["Дата операции"].dt.strftime("%d.%m.%Y")
 
     return df
