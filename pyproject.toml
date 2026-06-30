@@ -1,0 +1,45 @@
+[project]
+name = "transaction-analysis"
+version = "0.1.0"
+description = "Приложение для анализа транзакций."
+authors = [{name = "Yulianna_Aleeva", email = "89673838388@mail.ru"}]
+license = "MIT"
+requires-python = ">=3.10"
+dependencies = [
+    "pandas (>=2.3.3,<2.4.0)",
+    "openpyxl (>=3.1.5,<4.0.0)",
+    "pandas-stubs (<=2.3.3)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[dependency-groups]
+dev = [
+    "black (>=26.5.1,<27.0.0)",
+    "isort (>=8.0.1,<9.0.0)",
+    "flake8 (>=7.3.0,<8.0.0)",
+    "mypy (>=2.1.0,<3.0.0)",
+    "flake8-pyproject (>=1.2.4,<2.0.0)"
+]
+
+[tool.black]
+exclude = ".git/|.venv"
+target-version = ["py310"]
+line-length = 119
+
+[tool.isort]
+profile = "black"
+float_to_top = true
+combine_as_imports = true
+
+[tool.flake8]
+exclude = ".git, .venv, __pycache__, venv, env, .mypy_cache, .pytest_cache"
+max-line-length = 119
+
+[tool.mypy]
+disallow_untyped_defs = true
+warn_return_any = true
+exclude = ["venv"]
