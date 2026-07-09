@@ -1,11 +1,10 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import pandas as pd
-import requests
 
-from src.config import DATA_FILE, USER_SETTINGS, get_logger
+from src.config import DATA_FILE, get_logger
 from src.processor import format_date_column
 
 logger = get_logger(__name__)
@@ -27,39 +26,6 @@ def greeting_time() -> str:
         return "Добрый вечер"
     else:
         return "Доброй ночи"
-
-
-def get_currency_rates() -> Dict[str, Optional[float]]:
-    """Получает курсы валют и адрес API из настроек в user_settings.json."""
-    url = USER_SETTINGS.get("currency_url", "")
-    codes = USER_SETTINGS.get("user_currencies", [])
-    if not all([url, codes]):
-        logger.debug(f"Отсутствуют настройки: {', '.join(USER_SETTINGS.keys())}.")
-        raise ValueError(f"Отсутствуют настройки: {', '.join(USER_SETTINGS.keys())}.")
-
-    url = f"{USER_SETTINGS['currency_url']}?valute={','.join(USER_SETTINGS['user_currencies'])}"
-
-    try:
-        resp = requests.get(url, timeout=8)
-        resp.raise_for_status()
-        logger.debug(f"Статус ответа API: {resp.status_code}")
-
-        data = resp.json()
-        rates_block = data.get("Valute", {})
-
-        result: Dict[str, Optional[float]] = {}
-        for code in codes:
-            if code in rates_block:
-                result[code] = round(float(rates_block[code]["Value"]), 2)
-            else:
-                result[code] = None
-        logger.debug(f"Получено валют: {len(result)}.\nКурсы: {result}")
-
-        return result
-
-    except requests.RequestException as e:
-        logger.error(f"Ошибка запроса к API: {e}")
-        raise ValueError(f"Ошибка запроса к API: {e}")
 
 
 MAPPING = {

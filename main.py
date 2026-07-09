@@ -1,5 +1,6 @@
+from src.api import get_currency_rates
 from src.config import DATA_FILE
-from src.utils import current_date, get_currency_rates, greeting_time, load_transaction
+from src.utils import current_date, greeting_time, load_transaction
 
 # === ПРОВЕРКА КОДА ===
 if __name__ == "__main__":
