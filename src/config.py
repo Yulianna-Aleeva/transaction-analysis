@@ -8,6 +8,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+logging.basicConfig(level=logging.DEBUG)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
 
 class LoggingConfig(TypedDict):
     log_level: int

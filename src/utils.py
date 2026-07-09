@@ -31,19 +31,30 @@ def greeting_time() -> str:
 
 def get_currency_rates() -> Dict[str, Optional[float]]:
     """Получает курсы валют и адрес API из настроек в user_settings.json."""
-    url = USER_SETTINGS["currency_url"]
-    codes = USER_SETTINGS["user_currencies"]
-    result: Dict[str, Optional[float]] = {}
+    url = USER_SETTINGS.get("currency_url", "")
+    codes = USER_SETTINGS.get("user_currencies", [])
+    if not all([url, codes]):
+        logger.debug(f"Отсутствуют настройки: {', '.join(USER_SETTINGS.keys())}.")
+        raise ValueError(f"Отсутствуют настройки: {', '.join(USER_SETTINGS.keys())}.")
 
-    resp = requests.get(url, timeout=8)
-    resp.raise_for_status()
-    data = resp.json()
+    url = f"{USER_SETTINGS['currency_url']}?valute={','.join(USER_SETTINGS['user_currencies'])}"
 
-    rates_block = data.get("Valute", {})
-    for code in codes:
-        val = rates_block.get(code)
-        result[code] = round(float(val["Value"]), 2) if val and "Value" in val else None
-    return result
+    try:
+        resp = requests.get(url, timeout=8)
+        resp.raise_for_status()
+        logger.debug(f"Статус ответа API: {resp.status_code}")
+
+        data = resp.json()
+        rates_block = data.get("Valute", {})
+
+        result = {code: round(float(rates_block[code]["Value"]), 2) for code in codes if code in rates_block}
+        logger.debug(f"Получено валют: {len(result)}.\nКурсы: {result}")
+
+        return result
+
+    except requests.RequestException as e:
+        logger.error(f"Ошибка запроса к API: {e}")
+        raise ValueError(f"Ошибка запроса к API: {e}")
 
 
 def get_top_expenses(file_path: str, limit: int = 5) -> List[Dict[str, Any]]:

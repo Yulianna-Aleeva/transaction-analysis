@@ -1,11 +1,7 @@
-from src.utils import get_currency_rates
+from src.utils import get_currency_rates, current_date, greeting_time
 
-# === ПРОВЕРКА КОДА ===
-if __name__ == "__main__":
 
-    # === src.utils ===
-
-    # get_currency_rates()
-    rates = get_currency_rates()
-    for cur, value in rates.items():
-        print(f"{cur}: {value}")
+def main() -> None:
+    date = current_date()
+    greeting = greeting_time()
+    currency = get_currency_rates()
