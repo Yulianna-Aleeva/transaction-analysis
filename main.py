@@ -1,14 +1,19 @@
-from flask import Flask, render_template
+from src.config import DATA_FILE
+from src.utils import current_date, get_currency_rates, greeting_time, load_transaction
 
-from src.utils import current_date, get_currency_rates, greeting_time
+# === ПРОВЕРКА КОДА ===
+if __name__ == "__main__":
 
-app = Flask(__name__)
+    # === src.utils ===
 
-
-@app.route("/")
-def index() -> str:
+    # current_date, greeting_time, get_currency_rates
+    print(f"{greeting_time()}, Вас приветствует аналитик банковских операций!")
+    print(f"Курс валют на {current_date()}:")
     rates = get_currency_rates()
-    date = current_date()
-    greeting = greeting_time()
+    for cur, val in rates.items():
+        print(f"{cur}: {val}")
 
-    return render_template("index.html", rates=rates, date=date, greeting=greeting)
+    # load_transaction
+    df = load_transaction(DATA_FILE)
+    print(df.head())
+    print(df["date_operation"].dtype)
