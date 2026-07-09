@@ -1,4 +1,5 @@
-from src.utils import get_currency_rates, current_date, greeting_time
+from src.config import DATA_FILE
+from src.utils import current_date, get_currency_rates, greeting_time, load_transaction
 
 # === ПРОВЕРКА КОДА ===
 if __name__ == "__main__":
@@ -11,3 +12,8 @@ if __name__ == "__main__":
     rates = get_currency_rates()
     for cur, val in rates.items():
         print(f"{cur}: {val}")
+
+    # load_transaction
+    df = load_transaction(DATA_FILE)
+    print(df.head())
+    print(df["date_operation"].dtype)
