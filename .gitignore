@@ -214,7 +214,3 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
-
-# Моя папка для временных файлов и работ
-My_package
-/htmlcov/
