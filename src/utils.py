@@ -5,7 +5,10 @@ from typing import Any, Dict, List, Optional
 import pandas as pd
 import requests
 
+from src.config import USER_SETTINGS, get_logger
 from src.processor import format_date_column
+
+logger = get_logger(__name__)
 
 
 def current_date() -> str:
@@ -26,29 +29,21 @@ def greeting_time() -> str:
         return "Доброй ночи"
 
 
-def get_currency_rates() -> dict:
-    """Получает курсы валют (сейчас - из ЦБ РФ) и возвращает словарь."""
-    url = "https://www.cbr-xml-daily.ru/daily_json.js"
-    codes = ["CNY", "USD", "EUR"]
-    default_result = {code: None for code in codes}
+def get_currency_rates() -> Dict[str, Optional[float]]:
+    """Получает курсы валют и адрес API из настроек в user_settings.json."""
+    url = USER_SETTINGS["currency_url"]
+    codes = USER_SETTINGS["user_currencies"]
+    result: Dict[str, Optional[float]] = {}
 
-    try:
-        resp = requests.get(url, timeout=8)
-        resp.raise_for_status()
-        data = resp.json()
-        rates_block = data.get("Valute", {})
+    resp = requests.get(url, timeout=8)
+    resp.raise_for_status()
+    data = resp.json()
 
-        result: Dict[str, Optional[float]] = {}
-        for code in codes:
-            val = rates_block.get(code)
-            if val and "Value" in val:
-                result[code] = round(float(val["Value"]), 2)
-            else:
-                result[code] = None
-        return result
-
-    except (requests.RequestException, ValueError, KeyError):
-        return default_result
+    rates_block = data.get("Valute", {})
+    for code in codes:
+        val = rates_block.get(code)
+        result[code] = round(float(val["Value"]), 2) if val and "Value" in val else None
+    return result
 
 
 def get_top_expenses(file_path: str, limit: int = 5) -> List[Dict[str, Any]]:

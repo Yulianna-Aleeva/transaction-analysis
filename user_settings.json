@@ -1,4 +1,6 @@
 {
+  "currency_url": "https://www.cbr-xml-daily.ru/daily_json.js",
   "user_currencies": ["CNY", "USD", "EUR"],
+  "trading_url": "https://iss.moex.com/iss/engines/stock/markets/shares/boards/TQBR/securities.json",
   "user_stocks": ["AAPL", "AMZN", "GOOGL", "MSFT", "TSLA"]
 }
