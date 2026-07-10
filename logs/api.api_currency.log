@@ -1,0 +1,31 @@
+Вызов через main.py:
+2026-07-10 19:28:43,941 api.api_currency DEBUG   : Статус ответа API: 200
+2026-07-10 19:28:43,942 api.api_currency DEBUG   : Получено валют: 3.
+Курсы: {'CNY': 11.16, 'USD': 75.93, 'EUR': 86.59}.
+
+Вызов через test.py:
+2026-07-10 19:29:40,970 api.api_currency DEBUG   : Статус ответа API: 200
+2026-07-10 19:29:40,970 api.api_currency DEBUG   : Получено валют: 2.
+Курсы: {'USD': 75.12, 'EUR': 83.0}.
+2026-07-10 19:29:40,972 api.api_currency DEBUG   : Отсутствуют настройки: user_currencies.
+2026-07-10 19:29:40,973 api.api_currency DEBUG   : Отсутствуют настройки: currency_url.
+2026-07-10 19:29:40,975 api.api_currency ERROR   : Ошибка запроса к API: Connection error.
+Traceback (most recent call last):
+  File "C:\Users\Yulianna\Desktop\transaction-analysis\api\api_currency.py", line 21, in get_currency_rates
+    resp = requests.get(url, timeout=8)
+  File "C:\Users\Yulianna\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1105, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "C:\Users\Yulianna\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1109, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "C:\Users\Yulianna\AppData\Local\Programs\Python\Python310\lib\unittest\mock.py", line 1164, in _execute_mock_call
+    raise effect
+requests.exceptions.RequestException: Connection error
+2026-07-10 19:29:40,978 api.api_currency DEBUG   : Статус ответа API: 200
+2026-07-10 19:29:40,978 api.api_currency DEBUG   : Получено валют: 2.
+Курсы: {'USD': 75.56, 'EUR': None}.
+2026-07-10 19:29:40,981 api.api_currency DEBUG   : Статус ответа API: 200
+2026-07-10 19:29:40,981 api.api_currency DEBUG   : Получено валют: 2.
+Курсы: {'USD': 75.5, 'EUR': None}.
+2026-07-10 19:29:40,983 api.api_currency DEBUG   : Статус ответа API: 200
+2026-07-10 19:29:40,983 api.api_currency DEBUG   : Получено валют: 2.
+Курсы: {'USD': 75.13, 'EUR': None}.
