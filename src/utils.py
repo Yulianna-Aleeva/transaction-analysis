@@ -4,7 +4,7 @@ from typing import Any, Dict, List
 
 import pandas as pd
 
-from src.config import DATA_FILE, get_logger
+from logs.config import DATA_FILE, get_logger
 from src.processor import format_date_column
 
 logger = get_logger(__name__)

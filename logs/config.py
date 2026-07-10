@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import sys
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -32,12 +33,12 @@ for name in ("urllib3", "yfinance", "peewee"):
     logging.getLogger(name).setLevel(logging.ERROR)
 
 
-def get_logger(name: str) -> logging.Logger:
+def get_logger(name_file: str) -> logging.Logger:
     """Создаёт отдельный лог-файл для каждого модуля."""
-    module_name = name.removeprefix("src.").replace(".", "_")
-
+    # module_name = name_file.removeprefix("src.").replace(".", "_")
+    module_name = name_file
     if module_name == "__main__":
-        module_name = Path(os.sys.argv[0]).stem
+        module_name = Path(sys.argv[0]).stem
 
     logger = logging.getLogger(module_name)
     logger.setLevel(LOG_LEVEL)

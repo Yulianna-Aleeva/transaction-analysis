@@ -2,7 +2,7 @@ from typing import Dict, Optional
 
 import requests
 
-from src.config import USER_SETTINGS, get_logger
+from logs.config import USER_SETTINGS, get_logger
 
 logger = get_logger(__name__)
 
@@ -11,8 +11,8 @@ def get_currency_rates() -> Dict[str, Optional[float]]:
     """Получает курсы валют и адрес API из настроек в user_settings.json."""
     url = USER_SETTINGS.get("currency_url", "")
     codes = USER_SETTINGS.get("user_currencies", [])
-    if not all([url, codes]):
-        logger.debug(f"Отсутствуют настройки: {', '.join(USER_SETTINGS.keys())}.")
+    if "currency_url" not in USER_SETTINGS or "user_currencies" not in USER_SETTINGS or not all([url, codes]):
+        logger.debug("Отсутствуют настройки: %s.", ', '.join(USER_SETTINGS.keys()))
         raise ValueError(f"Отсутствуют настройки: {', '.join(USER_SETTINGS.keys())}.")
 
     url = f"{USER_SETTINGS['currency_url']}?valute={','.join(USER_SETTINGS['user_currencies'])}"
@@ -20,7 +20,7 @@ def get_currency_rates() -> Dict[str, Optional[float]]:
     try:
         resp = requests.get(url, timeout=8)
         resp.raise_for_status()
-        logger.debug(f"Статус ответа API: {resp.status_code}")
+        logger.debug("Статус ответа API: %s", resp.status_code)
 
         data = resp.json()
         rates_block = data.get("Valute", {})
@@ -31,10 +31,10 @@ def get_currency_rates() -> Dict[str, Optional[float]]:
                 result[code] = round(float(rates_block[code]["Value"]), 2)
             else:
                 result[code] = None
-        logger.debug(f"Получено валют: {len(result)}.\nКурсы: {result}")
+        logger.debug("Получено валют: %s.\nКурсы: %s.", len(result), result)
 
         return result
 
     except requests.RequestException as e:
-        logger.error(f"Ошибка запроса к API: {e}")
-        raise ValueError(f"Ошибка запроса к API: {e}")
+        logger.exception("Ошибка запроса к API: %s.", e)
+        raise ValueError(f"Ошибка запроса к API: {e}.")

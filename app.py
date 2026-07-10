@@ -1,6 +1,6 @@
 from flask import Flask, render_template
 
-from src.api import get_currency_rates
+from api.api_currency import get_currency_rates
 from src.utils import current_date, greeting_time
 
 app = Flask(__name__)
