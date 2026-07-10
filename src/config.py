@@ -2,54 +2,55 @@ import json
 import logging
 import os
 from pathlib import Path
-from typing import Optional, TypedDict
 
 from dotenv import load_dotenv
 
 load_dotenv()
 
-logging.basicConfig(level=logging.DEBUG)
-logging.getLogger("urllib3").setLevel(logging.WARNING)
+BASE_DIR = Path(__file__).resolve().parent.parent
+LOG_DIR = BASE_DIR / "logs"
+LOG_DIR.mkdir(exist_ok=True)
 
-class LoggingConfig(TypedDict):
-    log_level: int
-    log_format: str
-    file_mode: str
-    encoding: str
+DATA_FILE = os.getenv(
+    "DATA_FILE",
+    str(BASE_DIR / "data" / "operations.xlsx"),
+)
 
+USER_SETTINGS_PATH = BASE_DIR / "user_settings.json"
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATA_FILE = os.getenv("DATA_FILE", os.path.join(BASE_DIR, "data", "operations.xlsx"))
-USER_SETTINGS_PATH = os.path.join(BASE_DIR, "user_settings.json")
-with open(USER_SETTINGS_PATH, encoding="utf-8") as f:
-    USER_SETTINGS = json.load(f)
-LOG_DIR = os.path.join(BASE_DIR, "logs")
-os.makedirs(LOG_DIR, exist_ok=True)
-
-LOGGING_CONFIG: LoggingConfig = {
-    "log_level": logging.DEBUG,
-    "log_format": "%(asctime)s %(name)-12s %(levelname)-8s: %(message)s",
-    "file_mode": "w",  # "a" (append) сохраняет старые логи при перезапуске
-    "encoding": "utf-8",
-}
+with USER_SETTINGS_PATH.open(encoding="utf-8") as file:
+    USER_SETTINGS = json.load(file)
 
 
-def get_logger(log_name: Optional[str] = None) -> logging.Logger:
-    """Функция для получения готового логгера в любом файле."""
-    if log_name is None or log_name == "__main__":
-        module_name = Path(__file__).stem
-    else:
-        module_name = log_name.replace("src.", "").replace(".", "_")
+LOG_LEVEL = logging.DEBUG
+LOG_FORMAT = "%(asctime)s %(name)-12s %(levelname)-8s: %(message)s"
+FILE_MODE = "w"
+ENCODING = "utf-8"
+
+
+for name in ("urllib3", "yfinance", "peewee"):
+    logging.getLogger(name).setLevel(logging.ERROR)
+
+
+def get_logger(name: str) -> logging.Logger:
+    """Создаёт отдельный лог-файл для каждого модуля."""
+    module_name = name.removeprefix("src.").replace(".", "_")
+
+    if module_name == "__main__":
+        module_name = Path(os.sys.argv[0]).stem
 
     logger = logging.getLogger(module_name)
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(LOG_LEVEL)
     logger.propagate = False
 
     if not logger.handlers:
-        log_file = os.path.join(LOG_DIR, f"{module_name}.log")
-        handler = logging.FileHandler(log_file, mode=LOGGING_CONFIG["file_mode"], encoding=LOGGING_CONFIG["encoding"])
-        handler.setLevel(logging.DEBUG)
-        handler.setFormatter(logging.Formatter(LOGGING_CONFIG["log_format"]))
+        handler = logging.FileHandler(
+            LOG_DIR / f"{module_name}.log",
+            mode=FILE_MODE,
+            encoding=ENCODING,
+        )
+        handler.setLevel(LOG_LEVEL)
+        handler.setFormatter(logging.Formatter(LOG_FORMAT))
         logger.addHandler(handler)
 
     return logger
