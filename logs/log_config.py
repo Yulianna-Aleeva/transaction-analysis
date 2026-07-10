@@ -25,7 +25,7 @@ with USER_SETTINGS_PATH.open(encoding="utf-8") as file:
 
 LOG_LEVEL = logging.DEBUG
 LOG_FORMAT = "%(asctime)s %(name)-12s %(levelname)-8s: %(message)s"
-FILE_MODE = "w"  # a - сохраняет, w - перезаписывает
+FILE_MODE = "a"  # a - сохраняет, w - перезаписывает
 ENCODING = "utf-8"
 
 

@@ -3,7 +3,7 @@ from typing import Dict, Optional
 import requests
 import yfinance as yf
 
-from logs.config import USER_SETTINGS, get_logger
+from logs.log_config import USER_SETTINGS, get_logger
 
 logger = get_logger(__name__)
 
