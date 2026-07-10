@@ -25,7 +25,7 @@ with USER_SETTINGS_PATH.open(encoding="utf-8") as file:
 
 LOG_LEVEL = logging.DEBUG
 LOG_FORMAT = "%(asctime)s %(name)-12s %(levelname)-8s: %(message)s"
-FILE_MODE = "w"
+FILE_MODE = "w"  # a - сохраняет, w - перезаписывает
 ENCODING = "utf-8"
 
 
@@ -35,10 +35,20 @@ for name in ("urllib3", "yfinance", "peewee"):
 
 def get_logger(name_file: str) -> logging.Logger:
     """Создаёт отдельный лог-файл для каждого модуля."""
-    # module_name = name_file.removeprefix("src.").replace(".", "_")
+    # module_name = name_file.removeprefix("src.").replace(".", "_")  # чистое имя
     module_name = name_file
     if module_name == "__main__":
-        module_name = Path(sys.argv[0]).stem
+        # для прямого запуска
+        import inspect
+
+        frame = inspect.stack()[1]
+        file_path = Path(frame.filename)
+        try:
+            rel_path = file_path.relative_to(BASE_DIR)
+            module_name = ".".join(rel_path.with_suffix("").parts)
+        except ValueError:
+            # --- --- ---
+            module_name = Path(sys.argv[0]).stem
 
     logger = logging.getLogger(module_name)
     logger.setLevel(LOG_LEVEL)

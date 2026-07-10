@@ -1,0 +1,3 @@
+2026-07-10 22:07:36,287 api.api_stocks DEBUG   : MOEX результат: {'AAPL': None, 'AMZN': None, 'GOOGL': None, 'MSFT': None, 'TSLA': None}
+2026-07-10 22:07:36,289 api.api_stocks DEBUG   : Дозапрос Yahoo для недостающих кодов: ['AAPL', 'AMZN', 'GOOGL', 'MSFT', 'TSLA']
+2026-07-10 22:07:38,010 api.api_stocks DEBUG   : Yahoo результат: {'AAPL': 314.63, 'AMZN': 245.49, 'GOOGL': 354.92, 'MSFT': 385.5, 'TSLA': 411.35}
