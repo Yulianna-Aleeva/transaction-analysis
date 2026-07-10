@@ -11,8 +11,8 @@ def get_currency_rates() -> Dict[str, Optional[float]]:
     """Получает курсы валют и адрес API из настроек в user_settings.json."""
     url = USER_SETTINGS.get("currency_url", "")
     codes = USER_SETTINGS.get("user_currencies", [])
-    if "currency_url" not in USER_SETTINGS or "user_currencies" not in USER_SETTINGS or not all([url, codes]):
-        logger.debug("Отсутствуют настройки: %s.", ', '.join(USER_SETTINGS.keys()))
+    if not url or not codes:
+        logger.debug("Отсутствуют настройки: %s.", ", ".join(USER_SETTINGS.keys()))
         raise ValueError(f"Отсутствуют настройки: {', '.join(USER_SETTINGS.keys())}.")
 
     url = f"{USER_SETTINGS['currency_url']}?valute={','.join(USER_SETTINGS['user_currencies'])}"
