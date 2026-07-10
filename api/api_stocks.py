@@ -50,7 +50,7 @@ def get_stock_prices() -> Dict[str, Optional[float]]:
                         price = stock_info.get("LAST")
                         if price is not None:
                             try:
-                                result[code] = round(float(price), 2)
+                                moex_prices[code] = round(float(price), 2)
                             except (TypeError, ValueError):
                                 logger.debug("Некорректная цена для %s: %s", code, price)
 

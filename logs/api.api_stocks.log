@@ -1,3 +1,23 @@
-2026-07-10 22:07:36,287 api.api_stocks DEBUG   : MOEX результат: {'AAPL': None, 'AMZN': None, 'GOOGL': None, 'MSFT': None, 'TSLA': None}
-2026-07-10 22:07:36,289 api.api_stocks DEBUG   : Дозапрос Yahoo для недостающих кодов: ['AAPL', 'AMZN', 'GOOGL', 'MSFT', 'TSLA']
-2026-07-10 22:07:38,010 api.api_stocks DEBUG   : Yahoo результат: {'AAPL': 314.63, 'AMZN': 245.49, 'GOOGL': 354.92, 'MSFT': 385.5, 'TSLA': 411.35}
+Вызов через main.py:
+2026-07-10 22:28:59,569 api.api_stocks DEBUG   : MOEX результат: {'AAPL': None, 'AMZN': None, 'GOOGL': None, 'MSFT': None, 'TSLA': None}
+2026-07-10 22:28:59,570 api.api_stocks DEBUG   : Дозапрос Yahoo для недостающих кодов: ['AAPL', 'AMZN', 'GOOGL', 'MSFT', 'TSLA']
+2026-07-10 22:29:00,676 api.api_stocks DEBUG   : Yahoo результат: {'AAPL': 314.49, 'AMZN': 244.96, 'GOOGL': 354.48, 'MSFT': 384.36, 'TSLA': 410.69}
+
+Вызов через test.py:
+2026-07-10 22:29:23,211 api.api_stocks DEBUG   : MOEX результат: {'AAPL': 195.25, 'SBER': 310.4}
+2026-07-10 22:29:23,213 api.api_stocks ERROR   : Отсутствуют настройки: trading_url или user_stocks
+2026-07-10 22:29:23,214 api.api_stocks ERROR   : Отсутствуют настройки: trading_url или user_stocks
+2026-07-10 22:29:23,218 api.api_stocks ERROR   : Ошибка запроса к MOEX: Ошибка соединения
+2026-07-10 22:29:23,218 api.api_stocks WARNING : MOEX недоступен, переключаемся на Yahoo: Ошибка соединения
+2026-07-10 22:29:23,219 api.api_stocks DEBUG   : Yahoo результат: {'AAPL': 195.25, 'SBER': 310.4}
+2026-07-10 22:29:23,222 api.api_stocks DEBUG   : MOEX результат: {'AAPL': None, 'SBER': 310.4}
+2026-07-10 22:29:23,222 api.api_stocks DEBUG   : Дозапрос Yahoo для недостающих кодов: ['AAPL']
+2026-07-10 22:29:23,223 api.api_stocks DEBUG   : Yahoo результат: {'AAPL': 195.25, 'SBER': 310.4}
+2026-07-10 22:29:23,225 api.api_stocks ERROR   : Ошибка запроса к MOEX: MOEX недоступен
+2026-07-10 22:29:23,225 api.api_stocks WARNING : MOEX недоступен, переключаемся на Yahoo: MOEX недоступен
+2026-07-10 22:29:23,225 api.api_stocks ERROR   : Ошибка запроса к Yahoo Finance: Yahoo недоступен
+2026-07-10 22:29:23,225 api.api_stocks ERROR   : Не удалось получить данные ни с MOEX, ни с Yahoo: Yahoo недоступен
+2026-07-10 22:29:23,227 api.api_stocks DEBUG   : MOEX результат: {'AAPL': 195.26}
+2026-07-10 22:29:23,234 api.api_stocks DEBUG   : MOEX результат: {'AAPL': None, 'SBER': 310.4}
+2026-07-10 22:29:23,234 api.api_stocks DEBUG   : Дозапрос Yahoo для недостающих кодов: ['AAPL']
+2026-07-10 22:29:23,235 api.api_stocks DEBUG   : Yahoo результат: {'AAPL': 195.25, 'SBER': 310.4}
