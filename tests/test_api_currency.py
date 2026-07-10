@@ -4,7 +4,7 @@ from unittest.mock import Mock, patch
 import pytest
 import requests
 
-from api.api_currency import get_currency_rates
+from src.api.api_currency import get_currency_rates
 
 MODULE_PATH = "api.api_currency"
 

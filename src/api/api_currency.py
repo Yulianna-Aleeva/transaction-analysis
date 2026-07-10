@@ -2,7 +2,7 @@ from typing import Dict, Optional
 
 import requests
 
-from logs.log_config import USER_SETTINGS, get_logger
+from src.logs.log_config import USER_SETTINGS, get_logger
 
 logger = get_logger(__name__)
 

@@ -6,8 +6,8 @@ import pandas as pd
 import pytest
 import requests
 
-from api import api_stocks
-from api.api_stocks import get_stock_prices
+from src.api import api_stocks
+from src.api.api_stocks import get_stock_prices
 
 MODULE_PATH = "api.api_stocks"
 Settings = Dict[str, Any]

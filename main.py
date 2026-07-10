@@ -1,10 +1,11 @@
 import pandas as pd
 
-from api.api_currency import get_currency_rates
-from api.api_stocks import get_stock_prices
-from logs.log_config import DATA_FILE
-from src.services import simple_search
-from src.utils import current_date, greeting_time, load_transaction
+from src.api.api_currency import get_currency_rates
+from src.api.api_stocks import get_stock_prices
+from src.logs.log_config import DATA_FILE
+from src.services.search_services import simple_search
+from src.utils.data_loader import load_transaction
+from src.utils.dates_utils import current_date, greeting_time
 
 # === ПРОВЕРКА КОДА ===
 if __name__ == "__main__":
