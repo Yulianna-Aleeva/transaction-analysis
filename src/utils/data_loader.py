@@ -23,7 +23,7 @@ MAPPING = {
     "Сумма операции с округлением": "amount_operation_rounded",
 }
 REVERSE_MAPPING = {v: k for k, v in MAPPING.items()}
-REQUIRED_COLUMNS = {"Дата операции", "Сумма операции", "Категория", "Описание"}
+REQUIRED_COLUMNS_RUS = {"Дата операции", "Сумма операции", "Валюта операции", "Категория", "Описание"}
 
 
 def load_transaction(file_path: str = DATA_FILE) -> pd.DataFrame:
@@ -31,7 +31,7 @@ def load_transaction(file_path: str = DATA_FILE) -> pd.DataFrame:
     try:
         df = pd.read_excel(file_path)
 
-        missing_columns = REQUIRED_COLUMNS - set(df.columns)
+        missing_columns = REQUIRED_COLUMNS_RUS - set(df.columns)
         if missing_columns:
             logger.debug("Отсутствуют обязательные колонки:\n%s", "\n ".join(missing_columns))
             raise ValueError("Отсутствуют обязательные колонки:\n" + "\n".join(f"- {col}" for col in missing_columns))
