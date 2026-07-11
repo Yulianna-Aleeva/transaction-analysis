@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import requests
 import yfinance as yf
@@ -8,7 +8,7 @@ from src.logs.log_config import USER_SETTINGS, get_logger
 logger = get_logger(__name__)
 
 
-def get_stock_prices() -> Dict[str, Optional[float]]:
+def get_stock_prices() -> List[Dict[str, Any]]:
     """Получает цены акций: сначала MOEX, затем Yahoo."""
     url: str = USER_SETTINGS.get("trading_url", "")
     codes: list = USER_SETTINGS.get("user_stocks", [])
@@ -107,17 +107,17 @@ def get_stock_prices() -> Dict[str, Optional[float]]:
             raise
 
     try:
-        result = get_moex()
+        result_dict = get_moex()
     except Exception as fallback_err:
         logger.warning("MOEX недоступен, переключаемся на Yahoo: %s", fallback_err)
         try:
-            result = get_yahoo()
+            result_dict = get_yahoo()
         except Exception as final_err:
             final_message = f"Не удалось получить данные ни с MOEX, ни с Yahoo: {final_err}"
             logger.error(final_message)
             raise ValueError(final_message) from final_err
 
-    missing_codes = [code for code in codes if result.get(code) is None]
+    missing_codes = [code for code in codes if result_dict.get(code) is None]
 
     if missing_codes:
         logger.debug("Дозапрос Yahoo для недостающих кодов: %s", missing_codes)
@@ -125,8 +125,13 @@ def get_stock_prices() -> Dict[str, Optional[float]]:
             yahoo_supplement = get_yahoo()
             for code in missing_codes:
                 if yahoo_supplement.get(code) is not None:
-                    result[code] = yahoo_supplement[code]
+                    result_dict[code] = yahoo_supplement[code]
         except Exception as supplement_err:
             logger.error("Ошибка дозапроса Yahoo: %s", supplement_err)
 
-    return result
+    final_result: List[Dict[str, Any]] = []
+    for code, price in result_dict.items():
+        if price is not None and price > 0:
+            final_result.append({"stock": code, "price": price})
+
+    return final_result
