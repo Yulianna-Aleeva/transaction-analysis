@@ -43,7 +43,7 @@ def load_transaction(file_path: str = DATA_FILE) -> pd.DataFrame:
         # Логирование переименованных колонок
         if rename_dict:
             renamed_info = [f"{old} → {new}" for old, new in rename_dict.items()]
-            logger.info("Загружено строк: ", len(df))
+            logger.info("Загружено строк: %s", len(df))
             logger.debug("Переименованы колонки:\n%s", "\n".join(renamed_info))
         else:
             logger.info("Загружено строк: %s (колонки не переименовывались).", len(df))

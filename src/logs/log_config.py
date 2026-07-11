@@ -8,8 +8,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-BASE_DIR = Path(__file__).resolve().parents[2]
-LOG_DIR = BASE_DIR / "logs"
+BASE_DIR = Path(__file__).resolve().parents[2]  # корень проекта
+LOG_DIR = Path(__file__).resolve().parent  # сейчас: src/logs
 LOG_DIR.mkdir(exist_ok=True)
 
 DATA_FILE = os.getenv(
@@ -25,7 +25,7 @@ with USER_SETTINGS_PATH.open(encoding="utf-8") as file:
 
 LOG_LEVEL = logging.DEBUG
 LOG_FORMAT = "%(asctime)s %(name)-12s %(levelname)-8s: %(message)s"
-FILE_MODE = "a"  # a - сохраняет, w - перезаписывает
+FILE_MODE = "w"  # a - сохраняет, w - перезаписывает
 ENCODING = "utf-8"
 
 
