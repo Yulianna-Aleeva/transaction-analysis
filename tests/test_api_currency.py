@@ -6,7 +6,7 @@ import requests
 
 from src.api.api_currency import get_currency_rates
 
-MODULE_PATH = "api.api_currency"
+MODULE_PATH = "src.api.api_currency"
 
 
 @pytest.fixture

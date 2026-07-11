@@ -9,7 +9,7 @@ import requests
 from src.api import api_stocks
 from src.api.api_stocks import get_stock_prices
 
-MODULE_PATH = "api.api_stocks"
+MODULE_PATH = "src.api.api_stocks"
 Settings = Dict[str, Any]
 
 

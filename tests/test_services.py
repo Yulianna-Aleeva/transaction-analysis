@@ -3,7 +3,7 @@ import pytest
 
 from src.services.search_services import simple_search
 
-MODULE_PATH = "api.search"
+MODULE_PATH = "src.api.search"
 
 
 @pytest.fixture

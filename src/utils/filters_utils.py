@@ -8,7 +8,7 @@ logger = get_logger(__name__)
 
 
 def sort_df_by_column(df: pd.DataFrame, column: str, ascending: bool = True) -> pd.DataFrame:
-    """Сортирует DataFrame по колонке."""
+    """Сортирует DataFrame по колонке. False: по убыванию, True: по возрастанию."""
     if column not in df.columns:
         logger.error('Колонка "%s" для сортировки не найдена.', column)
         raise ValueError(f'Колонка "{column}" для сортировки не найдена.')
@@ -16,13 +16,13 @@ def sort_df_by_column(df: pd.DataFrame, column: str, ascending: bool = True) -> 
     return df.sort_values(by=column, ascending=ascending)
 
 
-def get_top_positions(df: pd.DataFrame, column: str, n: int = 5, ascending: bool = False) -> pd.DataFrame:
+def get_top_positions(df: pd.DataFrame, column: str | pd.Series, n: int = 5, ascending: bool = False) -> pd.DataFrame:
     """Возвращает ТОП-N строк по колонке. По умолчанию: 5. False: по убыванию, True: по возрастанию."""
     if column not in df.columns:
         logger.error('Колонка "%s" для вывода ТОП-%s не найдена.', column, n)
         raise ValueError(f'Колонка "{column}" для вывода ТОП-{n} не найдена.')
     logger.debug('ТОП-%s по колонке "%s", ascending=%s', n, column, ascending)
-    return df.sort_values(by=column, ascending=ascending, kind="mergesort").reset_index(drop=True)
+    return df.sort_values(by=column, ascending=ascending, kind="mergesort").head(n).reset_index(drop=True)
 
 
 def filter_last_3_months(df: pd.DataFrame, end_date: str | datetime | None = None) -> pd.DataFrame:
