@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-
+import sys
 from _pytest.monkeypatch import MonkeyPatch
 
 from src.logs import log_config
@@ -12,6 +12,20 @@ def clear_logger_handlers(logger_name: str) -> None:
     for handler in logger.handlers[:]:
         logger.removeHandler(handler)
         handler.close()
+
+
+def test_clear_logger_handlers() -> None:
+    """clear_logger_handlers удаляет handlers."""
+    logger_name = "test_clear_handlers"
+    logger = logging.getLogger(logger_name)
+
+    handler = logging.StreamHandler()
+    logger.addHandler(handler)
+    assert len(logger.handlers) == 1
+
+    clear_logger_handlers(logger_name)
+
+    assert len(logger.handlers) == 0
 
 
 def test_get_logger_creates_log_file(tmp_path: Path, monkeypatch: MonkeyPatch) -> None:
@@ -53,3 +67,30 @@ def test_external_loggers_have_error_level() -> None:
     assert logging.getLogger("urllib3").level == logging.ERROR
     assert logging.getLogger("yfinance").level == logging.ERROR
     assert logging.getLogger("peewee").level == logging.ERROR
+
+
+def test_get_logger_main_module(tmp_path: Path, monkeypatch: MonkeyPatch) -> None:
+    """get_logger корректно определяет имя при прямом запуске (__main__)."""
+    monkeypatch.setattr(log_config, "LOG_DIR", tmp_path)
+
+    logger = log_config.get_logger("__main__")
+
+    assert logger.name != "__main__"
+    assert logger.name.startswith("tests")
+
+    log_file = tmp_path / f"{logger.name}.log"
+    assert log_file.exists()
+
+
+def test_get_logger_main_module_value_error(tmp_path: Path, monkeypatch: MonkeyPatch) -> None:
+    """get_logger обрабатывает ValueError, если файл вне BASE_DIR."""
+    monkeypatch.setattr(log_config, "LOG_DIR", tmp_path)
+    monkeypatch.setattr(log_config, "BASE_DIR", Path("/fake/path/does/not/exist"))
+    monkeypatch.setattr(sys, "argv", ["/fake/script.py"])
+
+    logger = log_config.get_logger("__main__")
+
+    assert logger.name == "script"
+
+    log_file = tmp_path / "script.log"
+    assert log_file.exists()

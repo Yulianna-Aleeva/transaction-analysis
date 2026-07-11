@@ -1,3 +1,4 @@
+from unittest.mock import patch
 import pandas as pd
 import pytest
 
@@ -78,3 +79,18 @@ class TestSimpleSearch:
         """Запрос с лишними пробелами обкорректно обрабатывается."""
         result = simple_search(sample_df, "  Колхоз   160  ")
         assert len(result) == 1
+
+
+
+    def test_simple_search_exception(self, sample_df: pd.DataFrame) -> None:
+        """Покрывает ветку except при возникновении ошибки."""
+        df = pd.DataFrame({"description": ["тестовая строка"]})
+
+        with patch.object(
+                pd.DataFrame, "apply", side_effect=ValueError("Ошибка при обработке")
+        ):
+            result = simple_search(df, "тест")
+
+        assert result.empty
+        assert list(result.columns) == list(df.columns)
+        assert len(result) == 0
