@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Any, Dict, List
 
 import requests
 
@@ -7,32 +7,33 @@ from src.logs.log_config import USER_SETTINGS, get_logger
 logger = get_logger(__name__)
 
 
-def get_currency_rates() -> Dict[str, Optional[float]]:
-    """Получает курсы валют и адрес API из настроек в user_settings.json."""
+def get_currency_rates() -> List[Dict[str, Any]]:
+    """Получает курсы валют из API."""
     url = USER_SETTINGS.get("currency_url", "")
     codes = USER_SETTINGS.get("user_currencies", [])
+
     if not url or not codes:
         logger.debug("Отсутствуют настройки: %s.", ", ".join(USER_SETTINGS.keys()))
         raise ValueError(f"Отсутствуют настройки: {', '.join(USER_SETTINGS.keys())}.")
 
-    url = f"{USER_SETTINGS['currency_url']}?valute={','.join(USER_SETTINGS['user_currencies'])}"
+    url_with_params = f"{url}?valute={','.join(codes)}"
 
     try:
-        resp = requests.get(url, timeout=8)
+        resp = requests.get(url_with_params, timeout=8)
         resp.raise_for_status()
         logger.debug("Статус ответа API: %s", resp.status_code)
 
         data = resp.json()
         rates_block = data.get("Valute", {})
 
-        result: Dict[str, Optional[float]] = {}
+        result: List[Dict[str, Any]] = []
         for code in codes:
             if code in rates_block:
-                result[code] = round(float(rates_block[code]["Value"]), 2)
-            else:
-                result[code] = None
-        logger.debug("Получено валют: %s.\nКурсы: %s.", len(result), result)
+                rate = round(float(rates_block[code]["Value"]), 2)
+                if rate > 0:
+                    result.append({"currency": code, "rate": rate})
 
+        logger.debug("Получено валют: %s.\nКурсы: %s.", len(result), result)
         return result
 
     except requests.RequestException as e:
