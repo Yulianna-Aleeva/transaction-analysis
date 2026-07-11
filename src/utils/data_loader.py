@@ -22,32 +22,50 @@ MAPPING = {
     "Округление на инвесткопилку": "invest_rounding",
     "Сумма операции с округлением": "amount_operation_rounded",
 }
-
-REQUIRED_COLUMNS = {"date_operation", "amount_operation", "category", "description"}
+REVERSE_MAPPING = {v: k for k, v in MAPPING.items()}
+REQUIRED_COLUMNS = {"Дата операции", "Сумма операции", "Категория", "Описание"}
 
 
 def load_transaction(file_path: str = DATA_FILE) -> pd.DataFrame:
     """Загружает данные из Excel-файла, переименовывает колонки и приводит дату к datetime (dd.mm.yyyy)."""
     try:
         df = pd.read_excel(file_path)
-        rename_dict = {old: new for old, new in MAPPING.items() if old in df.columns}
-        df = df.rename(columns=rename_dict)
+
         missing_columns = REQUIRED_COLUMNS - set(df.columns)
         if missing_columns:
-            raise ValueError(f"Отсутствуют обязательные колонки: {', '.join(missing_columns)}.")
+            logger.debug("Отсутствуют обязательные колонки:\n%s", '\n '.join(missing_columns))
+            raise ValueError("Отсутствуют обязательные колонки:\n" + "\n".join(f"- {col}" for col in missing_columns))
+
+        # Переименовываем колонки, присутствующие в файле
+        rename_dict = {old: new for old, new in MAPPING.items() if old in df.columns}
+        df = df.rename(columns=rename_dict)
 
         # Приводим дату к datetime (dd.mm.yyyy)
         df["date_operation"] = pd.to_datetime(df["date_operation"], dayfirst=True, errors="coerce")
-        # Логирование типов дат в колонке "Дата операции"
+        if df["date_operation"].isna().all():
+            logger.debug('Колонка "%s" не распознана (все значения NaT).', REVERSE_MAPPING["date_operation"])
+            raise ValueError(f'Колонка "{REVERSE_MAPPING["date_operation"]}" не распознана.')
+
+        df["amount_operation"] = pd.to_numeric(df["amount_operation"], errors="coerce")
+        if df["amount_operation"].isna().all():
+            logger.debug('Колонка "%s" не распознана (все значения NaN).', REVERSE_MAPPING["amount_operation"])
+            raise ValueError(f'Колонка "{REVERSE_MAPPING["amount_operation"]}" не распознана.')
+
+        # Логирование
+        logger.info("Загружено строк: %s.", len(df))
+        # Логирование типов
         logger.debug("Тип date_operation: %s", df["date_operation"].dtype)
+        logger.debug("Тип amount_operation: %s", df["amount_operation"].dtype)
+
         # Логирование переименованных колонок
         if rename_dict:
             renamed_info = [f"{old} → {new}" for old, new in rename_dict.items()]
-            logger.info("Загружено строк: %s", len(df))
             logger.debug("Переименованы колонки:\n%s", "\n".join(renamed_info))
         else:
             logger.info("Загружено строк: %s (колонки не переименовывались).", len(df))
         return df
+
     except Exception as e:
-        logger.error("Ошибка загрузки файла %s: %s", file_path, e)
-        return pd.DataFrame()
+        logger.error("Ошибка загрузки файла %s: %s", file_path, e, exc_info=True)
+        raise ValueError(f"Ошибка загрузки файла {file_path}: {e}") from e
+
