@@ -16,7 +16,7 @@ def sort_df_by_column(df: pd.DataFrame, column: str, ascending: bool = True) -> 
     return df.sort_values(by=column, ascending=ascending)
 
 
-def get_top_positions(df: pd.DataFrame, column: str | pd.Series, n: int = 5, ascending: bool = False) -> pd.DataFrame:
+def get_top_positions(df: pd.DataFrame, column: str, n: int = 5, ascending: bool = False) -> pd.DataFrame:
     """Возвращает ТОП-N строк по колонке. По умолчанию: 5. False: по убыванию, True: по возрастанию."""
     if column not in df.columns:
         logger.error('Колонка "%s" для вывода ТОП-%s не найдена.', column, n)

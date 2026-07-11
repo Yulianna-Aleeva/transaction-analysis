@@ -74,7 +74,7 @@ def expenses_work_vs_weekend(df: pd.DataFrame, weekend_days: Optional[Sequence[s
     weekend = set(weekend_days) if weekend_days is not None else {"Суббота", "Воскресенье"}
 
     try:
-        expenses = df[df["amount_operation"] < 0]
+        expenses = df[df["amount_operation"] < 0].copy()
         expenses["day_name"] = expenses["date_operation"].dt.dayofweek.map(lambda day: DAYS_RU[int(day)])
         expenses["Тип дня"] = expenses["day_name"].apply(lambda day: "Выходной" if day in weekend else "Рабочий день")
 

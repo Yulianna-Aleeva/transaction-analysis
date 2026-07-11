@@ -33,7 +33,7 @@ def load_transaction(file_path: str = DATA_FILE) -> pd.DataFrame:
 
         missing_columns = REQUIRED_COLUMNS - set(df.columns)
         if missing_columns:
-            logger.debug("Отсутствуют обязательные колонки:\n%s", '\n '.join(missing_columns))
+            logger.debug("Отсутствуют обязательные колонки:\n%s", "\n ".join(missing_columns))
             raise ValueError("Отсутствуют обязательные колонки:\n" + "\n".join(f"- {col}" for col in missing_columns))
 
         # Переименовываем колонки, присутствующие в файле
@@ -41,7 +41,7 @@ def load_transaction(file_path: str = DATA_FILE) -> pd.DataFrame:
         df = df.rename(columns=rename_dict)
 
         # Приводим дату к datetime (dd.mm.yyyy)
-        df["date_operation"] = pd.to_datetime(df["date_operation"], dayfirst=True, errors="coerce")
+        df["date_operation"] = pd.to_datetime(df["date_operation"], format="%d.%m.%Y", dayfirst=True, errors="coerce")
         if df["date_operation"].isna().all():
             logger.debug('Колонка "%s" не распознана (все значения NaT).', REVERSE_MAPPING["date_operation"])
             raise ValueError(f'Колонка "{REVERSE_MAPPING["date_operation"]}" не распознана.')
@@ -68,4 +68,3 @@ def load_transaction(file_path: str = DATA_FILE) -> pd.DataFrame:
     except Exception as e:
         logger.error("Ошибка загрузки файла %s: %s", file_path, e, exc_info=True)
         raise ValueError(f"Ошибка загрузки файла {file_path}: {e}") from e
-
