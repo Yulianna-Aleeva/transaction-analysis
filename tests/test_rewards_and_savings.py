@@ -29,3 +29,8 @@ class TestCashback:
         df = pd.DataFrame({"date_operation": pd.to_datetime(["2024-01-01"]), "category": ["Еда"]})
         result = top_cashback_categories(df, 2024, 1)
         assert result == []
+
+    def test_error_handling(self) -> None:
+        df = pd.DataFrame({"category": ["A"], "cashback": [1.0]})  # нет date_operation
+        result = top_cashback_categories(df, 2024, 1)
+        assert result == []
