@@ -140,3 +140,15 @@ class TestGetCurrencyRates:
         # Должна остаться только одна валидная валюта
         assert len(result) == 1
         assert result[0] == {"currency": "USD", "rate": 75.5}
+
+    @patch(f"{MODULE_PATH}.requests.get")
+    def test_get_all_currency_rates(self, mock_get: Mock) -> None:
+        """Проверяет получение всех курсов без фильтрации."""
+        from src.api.api_currency import get_all_currency_rates
+
+        mock_resp = Mock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = {"Valute": {"USD": {"Value": 75.0}, "EUR": {"Value": 85.0}}}
+        mock_get.return_value = mock_resp
+        result = get_all_currency_rates()
+        assert result == {"USD": 75.0, "EUR": 85.0}
