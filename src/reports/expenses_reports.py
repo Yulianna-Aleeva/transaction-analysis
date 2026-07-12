@@ -12,23 +12,29 @@ REPORT_ERROR_USER = 'Ошибка расчёта отчёта "{report}": {error
 DAYS_RU = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]
 
 
+def _get_amount_rub_col(df: pd.DataFrame) -> str:
+    """Возвращает имя колонки с суммой в рублях (опционально)."""
+    return "amount_rub" if "amount_rub" in df.columns else "amount_operation"
+
+
 @save_report()
 def expenses_by_weekday(df: pd.DataFrame) -> pd.DataFrame:
     """Группирует траты по дням недели и считает общую сумму для каждого дня."""
     report_name = "Траты по дням недели"
 
     try:
-        expenses = df[df["amount_operation"] < 0].copy()
+        am_rub_col = _get_amount_rub_col(df)
+        expenses = df[df[am_rub_col] < 0].copy()
         expenses["weekday"] = expenses["date_operation"].dt.dayofweek
 
         result = (
-            expenses.groupby("weekday")["amount_operation"]
+            expenses.groupby("weekday")[am_rub_col]
             .mean()
             .round(2)
             .reset_index()
             .assign(**{"День недели": lambda data: data["weekday"].map(lambda day: DAYS_RU[int(day)])})
             .drop(columns=["weekday"])
-            .rename(columns={"amount_operation": "Итого расходов"})
+            .rename(columns={am_rub_col: "Итого расходов"})
         )
 
         result = result[["День недели", "Итого расходов"]]
@@ -47,14 +53,15 @@ def expenses_by_category(df: pd.DataFrame) -> pd.DataFrame:
     report_name = "Траты по категориям"
 
     try:
-        expenses = df[df["amount_operation"] < 0]
+        am_rub_col = _get_amount_rub_col(df)
+        expenses = df[df[am_rub_col] < 0]
 
         result = (
-            expenses.groupby("category")["amount_operation"]
+            expenses.groupby("category")[am_rub_col]
             .sum()
             .round(2)
             .reset_index()
-            .rename(columns={"category": "Категория", "amount_operation": "Итого расходов"})
+            .rename(columns={"category": "Категория", am_rub_col: "Итого расходов"})
             .sort_values("Итого расходов")
             .reset_index(drop=True)
         )
@@ -74,16 +81,17 @@ def expenses_work_vs_weekend(df: pd.DataFrame, weekend_days: Optional[Sequence[s
     weekend = set(weekend_days) if weekend_days is not None else {"Суббота", "Воскресенье"}
 
     try:
-        expenses = df[df["amount_operation"] < 0].copy()
+        am_rub_col = _get_amount_rub_col(df)
+        expenses = df[df[am_rub_col] < 0].copy()
         expenses["day_name"] = expenses["date_operation"].dt.dayofweek.map(lambda day: DAYS_RU[int(day)])
         expenses["Тип дня"] = expenses["day_name"].apply(lambda day: "Выходной" if day in weekend else "Рабочий день")
 
         result = (
-            expenses.groupby("Тип дня")["amount_operation"]
+            expenses.groupby("Тип дня")[am_rub_col]
             .mean()
             .round(2)
             .reset_index()
-            .rename(columns={"amount_operation": "Итого расходов"})
+            .rename(columns={am_rub_col: "Итого расходов"})
             .sort_values("Итого расходов")
             .reset_index(drop=True)
         )

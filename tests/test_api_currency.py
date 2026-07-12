@@ -39,7 +39,7 @@ class TestGetCurrencyRates:
             {"currency": "USD", "rate": 75.12},
             {"currency": "EUR", "rate": 83.0},
         ]
-        mock_get.assert_called_once()
+        mock_get.assert_called_once_with("http://test-api.com", timeout=8)
 
     def test_missing_url(self) -> None:
         """Отсутствует URL."""
@@ -116,6 +116,27 @@ class TestGetCurrencyRates:
             get_currency_rates()
 
         # Проверяем, что логгер был вызван с нужными аргументами
-        mock_logger.debug.assert_any_call("Статус ответа API: %s", 200)
-        expected_result = [{"currency": "USD", "rate": 75.12}, {"currency": "EUR", "rate": 83.0}]
-        mock_logger.debug.assert_any_call("Получено валют: %s.\nКурсы: %s.", 2, expected_result)
+        mock_logger.debug.assert_any_call("Загружено курсов валют: %d", 2)
+        mock_logger.debug.assert_any_call("Отобрано валют пользователя: %d.", 2)
+
+    @patch(f"{MODULE_PATH}.requests.get")
+    def test_invalid_currency_data_skipped(self, mock_get: Mock, default_settings: Dict[str, Any]) -> None:
+        """Пропускает валюты с некорректными данными (покрывает except блок)."""
+        mock_resp = Mock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = {
+            "Valute": {
+                "USD": {"Value": 75.5},  # корректная
+                "EUR": {"Value": "не число"},  # TypeError
+                "CNY": {"WrongKey": 11.3},  # KeyError
+                "TRY": {"Value": None},  # ValueError / TypeError
+            }
+        }
+        mock_get.return_value = mock_resp
+
+        with patch(f"{MODULE_PATH}.USER_SETTINGS", default_settings):
+            result = get_currency_rates()
+
+        # Должна остаться только одна валидная валюта
+        assert len(result) == 1
+        assert result[0] == {"currency": "USD", "rate": 75.5}
