@@ -1,3 +1,4 @@
+from typing import Any
 from unittest.mock import Mock, patch
 
 import pandas as pd
@@ -39,7 +40,7 @@ def test_load_transaction_success(
     mock_read_excel.return_value = raw_df.copy()
     mock_get_rates.return_value = {"USD": 75.0, "RUB": 1.0}
 
-    def fake_convert(dff, rates_list):
+    def fake_convert(dff: pd.DataFrame, rates_list: list[dict[str, Any]]) -> pd.DataFrame:
         dff = dff.copy()
         dff["amount_rub"] = dff["amount_operation"] * dff["currency_operation"].map(
             {r["currency"]: r["rate"] for r in rates_list}
@@ -86,8 +87,10 @@ def test_load_transaction_partial_bad_dates(raw_df: pd.DataFrame) -> None:
     mixed_df = raw_df.copy()
     mixed_df["Дата операции"] = ["31.12.2021", "не дата"]
 
-    with patch("src.utils.data_loader.get_all_currency_rates") as mock_rates, \
-         patch("src.utils.data_loader.convert_to_rub") as mock_conv:
+    with (
+        patch("src.utils.data_loader.get_all_currency_rates") as mock_rates,
+        patch("src.utils.data_loader.convert_to_rub") as mock_conv,
+    ):
         mock_rates.return_value = {"RUB": 1.0}
         mock_conv.side_effect = lambda dff, _: dff
 
@@ -103,8 +106,10 @@ def test_load_transaction_filter_failed(raw_df: pd.DataFrame) -> None:
     df = raw_df.copy()
     df.loc[1, "Статус"] = "FAILED"
 
-    with patch("src.utils.data_loader.get_all_currency_rates") as mock_rates, \
-         patch("src.utils.data_loader.convert_to_rub") as mock_conv:
+    with (
+        patch("src.utils.data_loader.get_all_currency_rates") as mock_rates,
+        patch("src.utils.data_loader.convert_to_rub") as mock_conv,
+    ):
         mock_rates.return_value = {"RUB": 1.0, "USD": 75.0}
         mock_conv.side_effect = lambda dff, _: dff
 
