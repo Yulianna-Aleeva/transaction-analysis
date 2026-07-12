@@ -11,8 +11,8 @@ from src.reports.expenses_reports import (
 )
 from src.services.search_services import simple_search
 from src.utils.data_loader import load_transaction
-from src.utils.dates_utils import current_date, greeting_time
 from src.utils.filters_utils import filter_last_3_months, get_top_positions
+from src.utils.format_utils import current_date, greeting_time
 
 app = Flask(__name__)
 

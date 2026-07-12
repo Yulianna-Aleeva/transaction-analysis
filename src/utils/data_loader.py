@@ -41,7 +41,9 @@ def load_transaction(file_path: str = DATA_FILE) -> pd.DataFrame:
         df = df.rename(columns=rename_dict)
 
         # Приводим дату к datetime (dd.mm.yyyy)
-        df["date_operation"] = pd.to_datetime(df["date_operation"], format="%d.%m.%Y", dayfirst=True, errors="coerce")
+        df["date_operation"] = pd.to_datetime(df["date_operation"], format="mixed", dayfirst=True, errors="coerce")
+        df["date_operation"] = df["date_operation"].dt.normalize()
+
         if df["date_operation"].isna().all():
             logger.debug('Колонка "%s" не распознана (все значения NaT).', REVERSE_MAPPING["date_operation"])
             raise ValueError(f'Колонка "{REVERSE_MAPPING["date_operation"]}" не распознана.')

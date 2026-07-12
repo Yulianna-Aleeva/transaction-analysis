@@ -6,7 +6,7 @@ logger = get_logger(__name__)
 
 
 def simple_search(df: pd.DataFrame, query: str) -> pd.DataFrame:
-    """Поиск без учёта регистра по всем текстовым полям."""
+    """Поиск без учёта регистра по всем текстовым полям по оригинальному файлу."""
     if not query:
         logger.debug("Пустой запрос поиска.")
         return df
@@ -49,4 +49,18 @@ def search_transfers(df: pd.DataFrame) -> pd.DataFrame:
         return result
     except Exception as e:
         logger.error("Ошибка поиска переводов: %s", e, exc_info=True)
+        return df.head(0)
+
+
+def search_phone_numbers(df: pd.DataFrame) -> pd.DataFrame:
+    """Возвращает транзакции с телефонными номерами в описании."""
+    try:
+        pattern = r"(?:\+7|8)\s*\(?\d{3}\)?[\s-]?\d{3}[\s-]?\d{2}[\s-]?\d{2}"
+        mask = df["description"].astype(str).str.contains(pattern, regex=True, na=False)
+
+        result = df[mask]
+        logger.debug("Найдено телефонных номеров: %s", len(result))
+        return result
+    except Exception as e:
+        logger.error("Ошибка поиска номеров телефона: %s", e, exc_info=True)
         return df.head(0)

@@ -3,7 +3,11 @@ from unittest.mock import patch
 import pandas as pd
 import pytest
 
-from src.services.search_services import search_transfers, simple_search
+from src.services.search_services import (
+    search_phone_numbers,
+    search_transfers,
+    simple_search,
+)
 
 MODULE_PATH = "src.api.search"
 
@@ -118,4 +122,30 @@ class TestSimpleSearch:
         """При ошибке возвращается пустой DataFrame."""
         broken_df = sample_df.drop(columns=["category"])
         result = search_transfers(broken_df)
+        assert result.empty
+
+    def test_search_phone_numbers(self, sample_df: pd.DataFrame) -> None:
+        """Находит номера в форматах +7 и 8, включая без скобок."""
+        new_rows = pd.DataFrame(
+            [
+                # Со скобками
+                {"category": "Связь", "description": "МТС +7 (921) 111-22-33"},
+                {"category": "Связь", "description": "Звонок 8 (495) 555-55-55"},
+                # Без скобок
+                {"category": "Связь", "description": "Оплата +7 921 111-22-33"},
+                {"category": "Связь", "description": "Телефон 8 495 555-55-55"},
+                # Без номера
+                {"category": "Еда", "description": "Покупка в Магнит"},
+            ]
+        )
+        df = pd.concat([sample_df, new_rows], ignore_index=True)
+
+        result = search_phone_numbers(df)
+
+        assert len(result) == 4
+
+    def test_search_phone_numbers_error(self, sample_df: pd.DataFrame) -> None:
+        """При ошибке возвращается пустой DataFrame."""
+        broken_df = sample_df.drop(columns=["description"])
+        result = search_phone_numbers(broken_df)
         assert result.empty
