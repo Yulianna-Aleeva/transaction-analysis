@@ -16,6 +16,7 @@ def raw_df() -> pd.DataFrame:
         {
             "Дата операции": ["31.12.2021", "01.01.2022"],
             "Сумма операции": ["-160.89", "1000"],
+            "Валюта операции": ["RUB", "USD"],
             "Категория": ["Супермаркеты", "Пополнения"],
             "Описание": ["Магнит", "Перевод"],
         }
@@ -29,6 +30,7 @@ def test_load_transaction_success(raw_df: pd.DataFrame) -> None:
 
     assert "date_operation" in result.columns
     assert "amount_operation" in result.columns
+    assert "currency_operation" in result.columns
     assert "category" in result.columns
     assert "description" in result.columns
 
@@ -55,7 +57,7 @@ def test_load_transaction_bad_date(raw_df: pd.DataFrame) -> None:
     broken_df["Дата операции"] = ["ошибка", "не дата"]
 
     with patch(f"{MODULE_PATH}.pd.read_excel", return_value=broken_df):
-        with pytest.raises(ValueError, match="Дата операции"):
+        with pytest.raises(ValueError, match="не распознана"):
             load_transaction("test.xlsx")
 
 
@@ -65,7 +67,7 @@ def test_load_transaction_bad_amount(raw_df: pd.DataFrame) -> None:
     broken_df["Сумма операции"] = ["abc", "ошибка"]
 
     with patch(f"{MODULE_PATH}.pd.read_excel", return_value=broken_df):
-        with pytest.raises(ValueError, match="Сумма операции"):
+        with pytest.raises(ValueError, match="не распознана"):
             load_transaction("test.xlsx")
 
 
