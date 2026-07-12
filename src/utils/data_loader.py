@@ -1,6 +1,8 @@
 import pandas as pd
 
+from src.api.api_currency import get_all_currency_rates
 from src.logs.log_config import DATA_FILE, get_logger
+from src.utils.format_utils import convert_to_rub
 
 logger = get_logger(__name__)
 
@@ -23,50 +25,56 @@ MAPPING = {
     "Сумма операции с округлением": "amount_operation_rounded",
 }
 REVERSE_MAPPING = {v: k for k, v in MAPPING.items()}
-REQUIRED_COLUMNS_RUS = {"Дата операции", "Сумма операции", "Валюта операции", "Категория", "Описание"}
+REQUIRED_COLUMNS_RUS = {
+    "Дата операции",
+    "Номер карты",
+    "Статус",
+    "Сумма операции",
+    "Валюта операции",
+    "Кэшбэк",
+    "Категория",
+    "Описание",
+}
 
 
 def load_transaction(file_path: str = DATA_FILE) -> pd.DataFrame:
-    """Загружает данные из Excel-файла, переименовывает колонки и приводит дату к datetime (dd.mm.yyyy)."""
+    """Загружает данные из Excel-файла и проверяет на обязательные колонки."""
     try:
         df = pd.read_excel(file_path)
-
         missing_columns = REQUIRED_COLUMNS_RUS - set(df.columns)
         if missing_columns:
-            logger.debug("Отсутствуют обязательные колонки:\n%s", "\n ".join(missing_columns))
-            raise ValueError("Отсутствуют обязательные колонки:\n" + "\n".join(f"- {col}" for col in missing_columns))
-
-        # Переименовываем колонки, присутствующие в файле
-        rename_dict = {old: new for old, new in MAPPING.items() if old in df.columns}
-        df = df.rename(columns=rename_dict)
-
-        # Приводим дату к datetime (dd.mm.yyyy)
-        df["date_operation"] = pd.to_datetime(df["date_operation"], format="mixed", dayfirst=True, errors="coerce")
-        df["date_operation"] = df["date_operation"].dt.normalize()
-
-        if df["date_operation"].isna().all():
-            logger.debug('Колонка "%s" не распознана (все значения NaT).', REVERSE_MAPPING["date_operation"])
-            raise ValueError(f'Колонка "{REVERSE_MAPPING["date_operation"]}" не распознана.')
-
-        df["amount_operation"] = pd.to_numeric(df["amount_operation"], errors="coerce")
-        if df["amount_operation"].isna().all():
-            logger.debug('Колонка "%s" не распознана (все значения NaN).', REVERSE_MAPPING["amount_operation"])
-            raise ValueError(f'Колонка "{REVERSE_MAPPING["amount_operation"]}" не распознана.')
-
-        # Логирование
-        logger.info("Загружено строк: %s.", len(df))
-        # Логирование типов
-        logger.debug("Тип date_operation: %s", df["date_operation"].dtype)
-        logger.debug("Тип amount_operation: %s", df["amount_operation"].dtype)
-
-        # Логирование переименованных колонок
-        if rename_dict:
-            renamed_info = [f"{old} → {new}" for old, new in rename_dict.items()]
-            logger.debug("Переименованы колонки:\n%s", "\n".join(renamed_info))
-        else:
-            logger.info("Загружено строк: %s (колонки не переименовывались).", len(df))  # pragma: no cover
-        return df
-
+            msg = "Отсутствуют обязательные колонки:\n" + "\n".join(f"- {c}" for c in missing_columns)
+            logger.debug(msg)
+            raise ValueError(msg)
+        return _parse_transactions(df)
     except Exception as e:
         logger.error("Ошибка загрузки файла %s: %s", file_path, e, exc_info=True)
         raise ValueError(f"Ошибка загрузки файла {file_path}: {e}") from e
+
+
+def _parse_transactions(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Переименовывает колонки, обрабатывает даты, суммы,
+    отбрасывает статус FAILED и конвертирует валюты в рубли.
+    """
+    # Переименовываем колонки с русского на английский по словарю "MAPPING"
+    rename_dict = {old: new for old, new in MAPPING.items() if old in df.columns}
+    df = df.rename(columns=rename_dict)
+
+    # Отбрасываем FAILED
+    if "status" in df.columns:
+        df = df[df["status"] == "OK"].copy()
+
+    # Проверяем суммы операций
+    df["amount_operation"] = pd.to_numeric(df["amount_operation"], errors="coerce")
+
+    # Приводим даты к datetime
+    df["date_operation"] = pd.to_datetime(df["date_operation"], format="mixed", dayfirst=True, errors="coerce")
+    df["date_operation"] = df["date_operation"].dt.normalize()
+
+    # Конвертируем все валюты в рубли
+    all_rates = get_all_currency_rates()
+    rates_list = [{"currency": c, "rate": r} for c, r in all_rates.items()]
+    df = convert_to_rub(df, rates_list)
+    logger.info("Обработано строк: %s.", len(df))
+    return df

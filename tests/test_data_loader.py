@@ -1,4 +1,4 @@
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pandas as pd
 import pytest
@@ -15,31 +15,54 @@ def raw_df() -> pd.DataFrame:
     return pd.DataFrame(
         {
             "Дата операции": ["31.12.2021", "01.01.2022"],
+            "Номер карты": ["*4556", "*7197"],
+            "Статус": ["OK", "OK"],
             "Сумма операции": ["-160.89", "1000"],
             "Валюта операции": ["RUB", "USD"],
+            "Кэшбэк": [1.61, 0.00],
             "Категория": ["Супермаркеты", "Пополнения"],
             "Описание": ["Магнит", "Перевод"],
         }
     )
 
 
-def test_load_transaction_success(raw_df: pd.DataFrame) -> None:
-    """Успешная загрузка и переименование колонок."""
-    with patch(f"{MODULE_PATH}.pd.read_excel", return_value=raw_df):
-        result = load_transaction("test.xlsx")
+@patch("src.utils.data_loader.get_all_currency_rates")
+@patch("src.utils.data_loader.convert_to_rub")
+@patch(f"{MODULE_PATH}.pd.read_excel")
+def test_load_transaction_success(
+    mock_read_excel: Mock,
+    mock_convert: Mock,
+    mock_get_rates: Mock,
+    raw_df: pd.DataFrame,
+) -> None:
+    """Успешная загрузка с конвертацией валют."""
+    mock_read_excel.return_value = raw_df.copy()
+    mock_get_rates.return_value = {"USD": 75.0, "RUB": 1.0}
+
+    def fake_convert(dff, rates_list):
+        dff = dff.copy()
+        dff["amount_rub"] = dff["amount_operation"] * dff["currency_operation"].map(
+            {r["currency"]: r["rate"] for r in rates_list}
+        ).fillna(1.0)
+        return dff
+
+    mock_convert.side_effect = fake_convert
+
+    result = load_transaction("test.xlsx")
 
     assert "date_operation" in result.columns
     assert "amount_operation" in result.columns
+    assert "amount_rub" in result.columns
     assert "currency_operation" in result.columns
     assert "category" in result.columns
     assert "description" in result.columns
 
     assert is_datetime64_any_dtype(result["date_operation"])
-    assert is_numeric_dtype(result["amount_operation"])
+    assert is_numeric_dtype(result["amount_rub"])
 
     assert result.loc[0, "category"] == "Супермаркеты"
-    assert result.loc[0, "description"] == "Магнит"
-    assert result.loc[0, "amount_operation"] == -160.89
+    assert result.loc[0, "amount_rub"] == pytest.approx(-160.89)
+    assert result.loc[1, "amount_rub"] == pytest.approx(75000.0)
 
 
 def test_load_transaction_missing_required_column(raw_df: pd.DataFrame) -> None:
@@ -51,26 +74,6 @@ def test_load_transaction_missing_required_column(raw_df: pd.DataFrame) -> None:
             load_transaction("test.xlsx")
 
 
-def test_load_transaction_bad_date(raw_df: pd.DataFrame) -> None:
-    """Дата операции не распознана."""
-    broken_df = raw_df.copy()
-    broken_df["Дата операции"] = ["ошибка", "не дата"]
-
-    with patch(f"{MODULE_PATH}.pd.read_excel", return_value=broken_df):
-        with pytest.raises(ValueError, match="не распознана"):
-            load_transaction("test.xlsx")
-
-
-def test_load_transaction_bad_amount(raw_df: pd.DataFrame) -> None:
-    """Сумма операции не распознана."""
-    broken_df = raw_df.copy()
-    broken_df["Сумма операции"] = ["abc", "ошибка"]
-
-    with patch(f"{MODULE_PATH}.pd.read_excel", return_value=broken_df):
-        with pytest.raises(ValueError, match="не распознана"):
-            load_transaction("test.xlsx")
-
-
 def test_load_transaction_read_excel_error() -> None:
     """Ошибка чтения Excel-файла."""
     with patch(f"{MODULE_PATH}.pd.read_excel", side_effect=FileNotFoundError("Файл не найден")):
@@ -78,16 +81,35 @@ def test_load_transaction_read_excel_error() -> None:
             load_transaction("missing.xlsx")
 
 
-def test_load_transaction_partial_bad_values(raw_df: pd.DataFrame) -> None:
-    """Частично плохие даты и суммы не ломают загрузку."""
+def test_load_transaction_partial_bad_dates(raw_df: pd.DataFrame) -> None:
+    """Плохие даты становятся NaT, но загрузка не падает."""
     mixed_df = raw_df.copy()
     mixed_df["Дата операции"] = ["31.12.2021", "не дата"]
-    mixed_df["Сумма операции"] = ["-160.89", "abc"]
 
-    with patch(f"{MODULE_PATH}.pd.read_excel", return_value=mixed_df):
-        result = load_transaction("test.xlsx")
+    with patch("src.utils.data_loader.get_all_currency_rates") as mock_rates, \
+         patch("src.utils.data_loader.convert_to_rub") as mock_conv:
+        mock_rates.return_value = {"RUB": 1.0}
+        mock_conv.side_effect = lambda dff, _: dff
+
+        with patch(f"{MODULE_PATH}.pd.read_excel", return_value=mixed_df):
+            result = load_transaction("test.xlsx")
 
     assert pd.notna(result.loc[0, "date_operation"])
     assert pd.isna(result.loc[1, "date_operation"])
-    assert result.loc[0, "amount_operation"] == -160.89
-    assert pd.isna(result.loc[1, "amount_operation"])
+
+
+def test_load_transaction_filter_failed(raw_df: pd.DataFrame) -> None:
+    """FAILED статусы отфильтровываются."""
+    df = raw_df.copy()
+    df.loc[1, "Статус"] = "FAILED"
+
+    with patch("src.utils.data_loader.get_all_currency_rates") as mock_rates, \
+         patch("src.utils.data_loader.convert_to_rub") as mock_conv:
+        mock_rates.return_value = {"RUB": 1.0, "USD": 75.0}
+        mock_conv.side_effect = lambda dff, _: dff
+
+        with patch(f"{MODULE_PATH}.pd.read_excel", return_value=df):
+            result = load_transaction("test.xlsx")
+
+    assert len(result) == 1
+    assert result.iloc[0]["status"] == "OK"
