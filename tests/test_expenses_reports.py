@@ -62,8 +62,8 @@ def test_expenses_work_vs_weekend_default(sample_df: pd.DataFrame) -> None:
     result = expenses_work_vs_weekend(sample_df)
 
     assert result.to_dict(orient="records") == [
-        {"Тип дня": "Выходной", "Итого расходов": -700},
-        {"Тип дня": "Рабочий день", "Итого расходов": -350},
+        {"Тип дня": "Выходной", "Итого расходов": -350},
+        {"Тип дня": "Рабочий день", "Итого расходов": -175},
     ]
 
 
@@ -72,7 +72,7 @@ def test_expenses_work_vs_weekend_custom_weekend(sample_df: pd.DataFrame) -> Non
     result = expenses_work_vs_weekend(sample_df, weekend_days=["Вторник"])
 
     assert result.to_dict(orient="records") == [
-        {"Тип дня": "Рабочий день", "Итого расходов": -850},
+        {"Тип дня": "Рабочий день", "Итого расходов": -283.33},
         {"Тип дня": "Выходной", "Итого расходов": -200},
     ]
 

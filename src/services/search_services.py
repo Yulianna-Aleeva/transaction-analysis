@@ -36,12 +36,11 @@ def simple_search(df: pd.DataFrame, query: str) -> pd.DataFrame:
         return df.head(0)
 
 
-def get_transfers(df: pd.DataFrame) -> pd.DataFrame:
-    """Возвращает переводы физлицам (Категория 'Переводы', в описании 'Имя Ф.')."""
+def search_transfers(df: pd.DataFrame) -> pd.DataFrame:
+    """Возвращает переводы ФЛ."""
     try:
         mask_cat = df["category"].str.contains("перевод", case=False, na=False)
 
-        # Regex: Заглавная буква, строчные буквы, пробел, заглавная буква, точка
         pattern = r"[А-ЯЁ][а-яё]+\s+[А-ЯЁ]\."
         mask_desc = df["description"].astype(str).str.contains(pattern, regex=True, na=False)
 

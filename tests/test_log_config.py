@@ -1,6 +1,7 @@
 import logging
-from pathlib import Path
 import sys
+from pathlib import Path
+
 from _pytest.monkeypatch import MonkeyPatch
 
 from src.logs import log_config
