@@ -10,6 +10,7 @@ from src.reports.expenses_reports import (
     expenses_by_weekday,
     expenses_work_vs_weekend,
 )
+from src.services.rewards_and_savings import top_cashback_categories
 from src.services.search_services import simple_search
 from src.utils.data_loader import load_transaction
 from src.utils.filters_utils import filter_last_3_months, get_top_positions
@@ -69,3 +70,22 @@ if __name__ == "__main__":
     top_5 = get_top_positions(df_3m, "amount_operation", n=5, ascending=True)
     print("\nТОП-5 расходов за 3 месяца:")
     print(top_5[["date_operation", "amount_operation", "category", "description"]].to_string(index=False))
+
+    # Кешбэк – ТОП-3 категории за последний месяц
+    latest_date = df["date_operation"].max()
+    cashback_top = top_cashback_categories(df, latest_date.year, latest_date.month)
+    print(f"\nТоп-3 категорий по кешбэку за {latest_date.strftime('%m.%Y')}:")
+    for item in cashback_top:
+        print(f"  {item['category']}: {item['cashback']} руб.")
+
+    # Отображение суммы с копейками
+    for _, row in df.head(15).iterrows():
+        date_str = row["date_operation"].strftime("%d.%m.%Y")
+        print(f"{date_str} | {row['amount_rub_formatted']} | {row['category']} | {row['description']}")
+    # Отображение суммы с округлением
+    for _, row in df.head(15).iterrows():
+        print(
+            f"{row['date_operation'].strftime('%d.%m.%Y')} | "
+            f"{row['amount_rub_rounded']:>12} | "
+            f"{row['category']} | {row['description']}"
+        )

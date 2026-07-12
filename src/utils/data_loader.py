@@ -2,7 +2,7 @@ import pandas as pd
 
 from src.api.api_currency import get_all_currency_rates
 from src.logs.log_config import DATA_FILE, get_logger
-from src.utils.format_utils import convert_to_rub
+from src.utils.format_utils import convert_to_rub, format_rub
 
 logger = get_logger(__name__)
 
@@ -76,5 +76,11 @@ def _parse_transactions(df: pd.DataFrame) -> pd.DataFrame:
     all_rates = get_all_currency_rates()
     rates_list = [{"currency": c, "rate": r} for c, r in all_rates.items()]
     df = convert_to_rub(df, rates_list)
+
+    # Форматируем отображение суммы с копейками
+    df["amount_rub_formatted"] = df["amount_rub"].apply(format_rub)
+    # Суммы с округлением
+    df["amount_rub_rounded"] = df["amount_rub"].round(0).astype(int)
+
     logger.info("Обработано строк: %s.", len(df))
     return df

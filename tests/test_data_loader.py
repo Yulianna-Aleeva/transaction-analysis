@@ -6,6 +6,7 @@ import pytest
 from pandas.api.types import is_datetime64_any_dtype, is_numeric_dtype
 
 from src.utils.data_loader import load_transaction
+from src.utils.format_utils import format_rub
 
 MODULE_PATH = "src.utils.data_loader"
 
@@ -25,6 +26,17 @@ def raw_df() -> pd.DataFrame:
             "Описание": ["Магнит", "Перевод"],
         }
     )
+
+
+@pytest.fixture
+def cards_df() -> pd.DataFrame:
+    return pd.DataFrame(
+        {
+            "card_number": ["*7197", "*7197", "*5814", "*5814", "*5814"],
+            "amount_rub": [-100.0, -300.0, -50.0, 1000.0, -200.0],
+            "category": ["Еда", "Такси", "Кафе", "Зарплата", "Переводы"],
+        }
+    )  # pragma: no cover
 
 
 @patch("src.utils.data_loader.get_all_currency_rates")
@@ -65,6 +77,10 @@ def test_load_transaction_success(
     assert result.loc[0, "amount_rub"] == pytest.approx(-160.89)
     assert result.loc[1, "amount_rub"] == pytest.approx(75000.0)
 
+    assert "amount_rub_formatted" in result.columns
+    assert "amount_rub_rounded" in result.columns
+    assert result.iloc[0]["amount_rub_formatted"] == format_rub(result.iloc[0]["amount_rub"])
+
 
 def test_load_transaction_missing_required_column(raw_df: pd.DataFrame) -> None:
     """Нет обязательной колонки."""
@@ -92,7 +108,11 @@ def test_load_transaction_partial_bad_dates(raw_df: pd.DataFrame) -> None:
         patch("src.utils.data_loader.convert_to_rub") as mock_conv,
     ):
         mock_rates.return_value = {"RUB": 1.0}
-        mock_conv.side_effect = lambda dff, _: dff
+        mock_conv.side_effect = lambda dff, _: dff.assign(
+            amount_rub=pd.to_numeric(dff["amount_operation"], errors="coerce"),
+            amount_rub_formatted=dff["amount_operation"],
+            amount_rub_rounded=0,
+        )
 
         with patch(f"{MODULE_PATH}.pd.read_excel", return_value=mixed_df):
             result = load_transaction("test.xlsx")
@@ -111,7 +131,11 @@ def test_load_transaction_filter_failed(raw_df: pd.DataFrame) -> None:
         patch("src.utils.data_loader.convert_to_rub") as mock_conv,
     ):
         mock_rates.return_value = {"RUB": 1.0, "USD": 75.0}
-        mock_conv.side_effect = lambda dff, _: dff
+        mock_conv.side_effect = lambda dff, _: dff.assign(
+            amount_rub=pd.to_numeric(dff["amount_operation"], errors="coerce"),
+            amount_rub_formatted=dff["amount_operation"],
+            amount_rub_rounded=0,
+        )
 
         with patch(f"{MODULE_PATH}.pd.read_excel", return_value=df):
             result = load_transaction("test.xlsx")
