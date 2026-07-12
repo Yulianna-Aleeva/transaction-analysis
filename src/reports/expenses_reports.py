@@ -23,7 +23,7 @@ def expenses_by_weekday(df: pd.DataFrame) -> pd.DataFrame:
 
         result = (
             expenses.groupby("weekday")["amount_operation"]
-            .sum()
+            .mean()
             .round(2)
             .reset_index()
             .assign(**{"День недели": lambda data: data["weekday"].map(lambda day: DAYS_RU[int(day)])})
@@ -80,7 +80,7 @@ def expenses_work_vs_weekend(df: pd.DataFrame, weekend_days: Optional[Sequence[s
 
         result = (
             expenses.groupby("Тип дня")["amount_operation"]
-            .sum()
+            .mean()
             .round(2)
             .reset_index()
             .rename(columns={"amount_operation": "Итого расходов"})

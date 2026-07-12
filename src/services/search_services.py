@@ -34,3 +34,20 @@ def simple_search(df: pd.DataFrame, query: str) -> pd.DataFrame:
     except Exception as e:
         logger.error("Ошибка поиска транзакций: %s", e, exc_info=True)
         return df.head(0)
+
+
+def get_transfers(df: pd.DataFrame) -> pd.DataFrame:
+    """Возвращает переводы физлицам (Категория 'Переводы', в описании 'Имя Ф.')."""
+    try:
+        mask_cat = df["category"].str.contains("перевод", case=False, na=False)
+
+        # Regex: Заглавная буква, строчные буквы, пробел, заглавная буква, точка
+        pattern = r"[А-ЯЁ][а-яё]+\s+[А-ЯЁ]\."
+        mask_desc = df["description"].astype(str).str.contains(pattern, regex=True, na=False)
+
+        result = df[mask_cat & mask_desc]
+        logger.debug("Найдено переводов ФЛ: %s", len(result))
+        return result
+    except Exception as e:
+        logger.error("Ошибка поиска переводов: %s", e, exc_info=True)
+        return df.head(0)
