@@ -37,6 +37,7 @@ if __name__ == "__main__":
 
     # load_transaction
     df = load_transaction(DATA_FILE)
+    print(df.head())
 
     # Главный JSON-ответ
     print("\n[ГЛАВНАЯ СТРАНИЦА (JSON)]")
