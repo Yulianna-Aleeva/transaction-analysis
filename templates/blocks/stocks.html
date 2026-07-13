@@ -1,0 +1,5 @@
+<table>
+    {% for stock in stock_prices %}
+    <tr><td>{{ stock.stock }}</td><td class="amount-expense">{{ stock.price }}</td></tr>
+    {% endfor %}
+</table>

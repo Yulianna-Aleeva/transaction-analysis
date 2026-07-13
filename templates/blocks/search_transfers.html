@@ -1,0 +1,26 @@
+<h3 style="margin-top: 20px;">Переводы физлицам</h3>
+<form method="POST" style="display: flex; align-items: center; gap: 5px;">
+    <input type="hidden" name="hide_top7" value="{{ 'on' if hide_top7 else '' }}">
+    <input type="hidden" name="hide_top5" value="{{ 'on' if hide_top5 else '' }}">
+    <input type="hidden" name="hide_top3" value="{{ 'on' if hide_top3 else '' }}">
+    <input type="hidden" name="hide_weekday" value="{{ 'on' if hide_weekday else '' }}">
+    <input type="hidden" name="hide_workday" value="{{ 'on' if hide_workday else '' }}">
+    <input type="hidden" name="custom_end" value="{{ custom_end }}">
+    <input type="hidden" name="transfer_all" value="on">
+    <button type="submit">Весь список</button>
+    <input type="text" name="transfer_query" placeholder="Имя Ф.">
+    <button type="submit">Искать</button>
+    {% if transfer_results %}<a href="/"><button type="button" class="clear-btn">Очистить</button></a>{% endif %}
+</form>
+{% if transfer_results %}
+    <div class="search-stats"><span>Найдено: {{ transfer_count }}</span><span>Сумма: {{ transfer_total }}</span></div>
+    <table class="search-results">
+        <tr><th>Дата</th><th>Сумма</th><th>Описание</th></tr>
+        {% for tx in transfer_results %}
+        <tr><td>{{ tx.date_operation }}</td><td class="amount-expense">{{ tx.amount_rub }}</td><td>{{ tx.description }}</td></tr>
+        {% endfor %}
+    </table>
+    <a href="/"><button class="clear-btn">Очистить</button></a>
+{% elif transfer_count == 0 and (request.form.get('transfer_query') or request.form.get('transfer_all')) %}
+    <p>{{ messages['NOT_FOUND'] }}</p>
+{% endif %}

@@ -1,0 +1,9 @@
+<form method="POST" class="small-toggle">
+    <input type="hidden" name="custom_end" value="{{ custom_end }}">
+    <input type="hidden" name="hide_top7" value="{{ 'on' if hide_top7 else '' }}">
+    <input type="hidden" name="hide_top5" value="{{ 'on' if hide_top5 else '' }}">
+    <input type="hidden" name="hide_top3" value="{{ 'on' if hide_top3 else '' }}">
+    <input type="hidden" name="hide_weekday" value="{{ 'on' if hide_weekday else '' }}">
+    <input type="hidden" name="hide_workday" value="{{ 'off' if hide_workday else 'on' }}">
+    <button type="submit">{% if hide_workday %}Показать переводы{% else %}Скрыть переводы{% endif %}</button>
+</form>
