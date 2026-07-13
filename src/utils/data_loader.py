@@ -1,3 +1,5 @@
+from functools import lru_cache
+
 import pandas as pd
 
 from src.api.api_currency import get_all_currency_rates
@@ -5,7 +7,6 @@ from src.logs.log_config import DATA_FILE, get_logger
 from src.utils.format_utils import convert_to_rub, format_rub
 
 logger = get_logger(__name__)
-
 
 MAPPING = {
     "Дата операции": "date_operation",
@@ -37,6 +38,12 @@ REQUIRED_COLUMNS_RUS = {
 }
 
 
+# Кэшируем курсы валют на сессию/время работы потока
+@lru_cache(maxsize=1)
+def _get_cached_rates() -> list[dict[str, float | str]]:
+    return [{"currency": c, "rate": r} for c, r in get_all_currency_rates().items()]
+
+
 def load_transaction(file_path: str = DATA_FILE) -> pd.DataFrame:
     """Загружает данные из Excel-файла и проверяет на обязательные колонки."""
     try:
@@ -46,7 +53,17 @@ def load_transaction(file_path: str = DATA_FILE) -> pd.DataFrame:
             msg = "Отсутствуют обязательные колонки:\n" + "\n".join(f"- {c}" for c in missing_columns)
             logger.debug(msg)
             raise ValueError(msg)
-        return _parse_transactions(df)
+
+        # Очистка дублей до начала обработки
+        df = df.drop_duplicates()
+
+        parsed_df = _parse_transactions(df)
+
+        # Подготовка индекса для быстрого поиска по описанию (нижний регистр)
+        if "description" in parsed_df.columns:
+            parsed_df["desc_lower"] = parsed_df["description"].astype(str).str.lower()
+
+        return parsed_df
     except Exception as e:
         logger.error("Ошибка загрузки файла %s: %s", file_path, e, exc_info=True)
         raise ValueError(f"Ошибка загрузки файла {file_path}: {e}") from e
@@ -72,9 +89,8 @@ def _parse_transactions(df: pd.DataFrame) -> pd.DataFrame:
     df["date_operation"] = pd.to_datetime(df["date_operation"], format="mixed", dayfirst=True, errors="coerce")
     df["date_operation"] = df["date_operation"].dt.normalize()
 
-    # Конвертируем все валюты в рубли
-    all_rates = get_all_currency_rates()
-    rates_list = [{"currency": c, "rate": r} for c, r in all_rates.items()]
+    # Конвертируем все валюты в рубли, используя закэшированные курсы
+    rates_list = _get_cached_rates()
     df = convert_to_rub(df, rates_list)
 
     # Форматируем отображение суммы с копейками
