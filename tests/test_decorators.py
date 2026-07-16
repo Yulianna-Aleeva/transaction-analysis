@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict
+from typing import List
 
 import pandas as pd
 from _pytest.monkeypatch import MonkeyPatch

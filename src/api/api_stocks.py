@@ -1,9 +1,13 @@
-from typing import Any, Dict, List, Optional
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
 
 import requests
 import yfinance as yf
 
-from src.logs.log_config import USER_SETTINGS, get_logger
+from src.logs.log_config import USER_SETTINGS
+from src.logs.log_config import get_logger
 
 logger = get_logger(__name__)
 

@@ -1,9 +1,11 @@
 from typing import Any
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
+from unittest.mock import patch
 
 import pandas as pd
 import pytest
-from pandas.api.types import is_datetime64_any_dtype, is_numeric_dtype
+from pandas.api.types import is_datetime64_any_dtype
+from pandas.api.types import is_numeric_dtype
 
 from src.utils.data_loader import load_transaction
 from src.utils.format_utils import format_rub

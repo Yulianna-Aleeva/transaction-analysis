@@ -3,11 +3,9 @@ from unittest.mock import patch
 import pandas as pd
 import pytest
 
-from src.services.search_services import (
-    search_phone_numbers,
-    search_transfers,
-    simple_search,
-)
+from src.services.search_services import search_phone_numbers
+from src.services.search_services import search_transfers
+from src.services.search_services import simple_search
 
 MODULE_PATH = "src.api.search"
 

@@ -1,4 +1,7 @@
-from typing import Any, Dict, List, cast
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import cast
 
 import pandas as pd
 

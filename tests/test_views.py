@@ -1,7 +1,9 @@
 import pandas as pd
 import pytest
 
-from src.views import get_cards_info, get_events_page_data, get_main_page_data
+from src.views import get_cards_info
+from src.views import get_events_page_data
+from src.views import get_main_page_data
 
 
 @pytest.fixture

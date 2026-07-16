@@ -5,13 +5,11 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src.utils.format_utils import (
-    convert_to_rub,
-    current_date,
-    format_rub,
-    format_rub_rounded,
-    greeting_time,
-)
+from src.utils.format_utils import convert_to_rub
+from src.utils.format_utils import current_date
+from src.utils.format_utils import format_rub
+from src.utils.format_utils import format_rub_rounded
+from src.utils.format_utils import greeting_time
 
 MODULE_PATH = "src.utils.format_utils"
 

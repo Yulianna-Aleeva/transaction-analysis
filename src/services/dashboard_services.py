@@ -1,6 +1,10 @@
 import re
 import time
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Tuple
 
 import pandas as pd
 from flask import Request
@@ -8,20 +12,18 @@ from flask import Request
 from src.api.api_currency import get_currency_rates
 from src.api.api_stocks import get_stock_prices
 from src.constants import MESSAGES
-from src.logs.log_config import DATA_FILE, get_logger
-from src.reports.expenses_reports import (
-    expenses_by_category,
-    expenses_by_weekday,
-    expenses_work_vs_weekend,
-)
-from src.services.search_services import (
-    search_phone_numbers,
-    search_transfers,
-    simple_search,
-)
+from src.logs.log_config import DATA_FILE
+from src.logs.log_config import get_logger
+from src.reports.expenses_reports import expenses_by_category
+from src.reports.expenses_reports import expenses_by_weekday
+from src.reports.expenses_reports import expenses_work_vs_weekend
+from src.services.search_services import search_phone_numbers
+from src.services.search_services import search_transfers
+from src.services.search_services import simple_search
 from src.utils.data_loader import load_transaction
 from src.utils.filters_utils import filter_last_3_months
-from src.utils.format_utils import format_rub, format_rub_rounded
+from src.utils.format_utils import format_rub
+from src.utils.format_utils import format_rub_rounded
 from src.views import get_cards_info
 
 logger = get_logger(__name__)
