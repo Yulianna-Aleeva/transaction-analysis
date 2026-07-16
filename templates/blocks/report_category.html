@@ -1,6 +1,3 @@
-<table>
-    <tr><th>Категория</th><th>Сумма</th></tr>
-    {% for row in category_report %}
-    <tr><td>{{ row["Категория"] }}</td><td class="amount-expense">{{ row["Итого расходов"] }}</td></tr>
-    {% endfor %}
-</table>
+<h3 style="margin:0 0 10px 0;">Расходы по категориям</h3>
+<table><tr><th>Категория</th><th>Сумма</th></tr>
+{% for r in cat_rep %}<tr><td>{{ r['Категория'] }}</td><td class="sum">{{ r['Итого расходов'] }}</td></tr>{% endfor %}</table>

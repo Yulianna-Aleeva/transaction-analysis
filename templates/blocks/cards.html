@@ -1,0 +1,22 @@
+<div class="block col-4">
+    <h3 style="margin:0 0 15px 0;">Информация по картам за 3 месяца</h3>
+    <p class="small" style="font-style:italic;">* за период с {{ period_start }} по {{ period_end }}</p>
+    <form method="GET" style="display:flex;gap:5px;margin:8px 0;">
+      <input type="text" name="custom_end" placeholder="дд.мм.гггг" value="{{ custom_end or '' }}">
+      <button class="btn">Пересчитать</button>
+    </form>
+    {% if no_data %}<p class="sum">{{ no_data }}</p>{% endif %}
+    <table style="margin-top:10px;">
+      <tr><th>Карта</th><th>Расходы</th><th>Кешбэк</th></tr>
+      {% for card in cards %}
+      <tr>
+        <td>**** {{ card.last_digits }}</td>
+        <td class="sum">{{ card.total_spent }}</td>
+        <td class="cash">{{ card.cashback }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    {% if no_data %}
+    <p class="text-muted" style="margin-top:12px;">Нет операций по картам за этот период.</p>
+    {% endif %}
+</div>

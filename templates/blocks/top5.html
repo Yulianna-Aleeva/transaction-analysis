@@ -1,9 +1,26 @@
-<form method="POST" class="small-toggle">
-    <input type="hidden" name="custom_end" value="{{ custom_end }}">
-    <input type="hidden" name="hide_top7" value="{{ 'on' if hide_top7 else '' }}">
-    <input type="hidden" name="hide_top3" value="{{ 'on' if hide_top3 else '' }}">
-    <input type="hidden" name="hide_weekday" value="{{ 'on' if hide_weekday else '' }}">
-    <input type="hidden" name="hide_workday" value="{{ 'on' if hide_workday else '' }}">
-    <input type="hidden" name="hide_top5" value="{{ 'off' if hide_top5 else 'on' }}">
-    <button type="submit">{% if hide_top5 %}Показать переводы{% else %}Скрыть переводы{% endif %}</button>
-</form>
+<div class="block">
+  <h3 style="margin:0 0 15px 0;">Топ-5 расходов
+    <button id="top5-btn" class="btn-hide" onclick="toggle('top5-w','top5-wo','top5-st','top5-btn','h5')">Скрыть переводы</button>
+  </h3>
+  <div id="top5-w">
+    <table style="margin-top:10px;">
+      <tr>
+        <th>Дата</th>
+        <th style="width:110px;">Сумма</th>
+        <th>Категория</th>
+      </tr>
+    {% for tx in top5_with %}
+      <tr>
+        <td>{{ tx.date }}</td>
+        <td class="sum">{{ tx.amount }}</td>
+        <td>{{ tx.category }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    <span id="top5-st" class="small sum"></span>
+  </div>
+  <div id="top5-wo" class="hidden">
+    <table style="margin-top:10px;"><tr><th>Дата</th><th>Сумма</th><th>Категория</th></tr>
+    {% for tx in top5_without %}<tr><td>{{ tx.date }}</td><td class="sum">{{ tx.amount }}</td><td>{{ tx.category }}</td></tr>{% endfor %}</table>
+  </div>
+</div>

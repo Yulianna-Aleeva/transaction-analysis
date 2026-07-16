@@ -28,11 +28,9 @@ def get_main_page_data(date_str: str, df: pd.DataFrame, use_last_date: bool = Fa
 
         top_5 = period.sort_values("amount_rub", ascending=False).head(5).copy()
         top_5["date"] = top_5["date_operation"].dt.strftime("%d.%m.%Y")
-        top_transactions = (
-            top_5[["date", "amount_rub", "category", "description"]]
-            .rename(columns={"amount_rub": "amount"})
-            .to_dict(orient="records")
-        )
+        top_5["amount"] = top_5["amount_rub"].abs().round(0).astype(int)
+
+        top_transactions = top_5[["date", "amount", "category", "description"]].to_dict(orient="records")
 
         result = {
             "greeting": greeting_time(),
@@ -66,10 +64,10 @@ def get_events_page_data(date_str: str, df: pd.DataFrame) -> Dict[str, Any]:
         total_expenses = int(abs(expenses_df["amount_rub"].sum()))
 
         cat_sum = expenses_df.groupby("category")["amount_rub"].sum().abs().sort_values(ascending=False)
+        cat_sum = cat_sum.round(0).astype(int)
 
         top7 = cat_sum.head(7).reset_index()
         top7.columns = ["category", "amount"]
-        top7["amount"] = top7["amount"].astype(int)
         top7_list = top7.to_dict(orient="records")
 
         if len(cat_sum) > 7:
@@ -81,6 +79,7 @@ def get_events_page_data(date_str: str, df: pd.DataFrame) -> Dict[str, Any]:
             transfers_cash.groupby("category")["amount_rub"]
             .sum()
             .abs()
+            .round(0)
             .astype(int)
             .reset_index()
             .rename(columns={"amount_rub": "amount"})
@@ -94,6 +93,7 @@ def get_events_page_data(date_str: str, df: pd.DataFrame) -> Dict[str, Any]:
         income_cat = (
             income_df.groupby("category")["amount_rub"]
             .sum()
+            .round(0)
             .astype(int)
             .sort_values(ascending=False)
             .reset_index()
@@ -137,13 +137,13 @@ def get_cards_info(df: pd.DataFrame) -> List[Dict[str, Any]]:
         card_raw = str(row["card_number"]).replace("*", "").strip()
         last_digits = card_raw[-4:] if card_raw else "0000"
 
-        total_spent = round(abs(row[amount_col]), 2)
+        total_spent = round(abs(row[amount_col]), 0)
         cashback = round(total_spent / 100, 2)
 
         result.append(
             {
                 "last_digits": last_digits,
-                "total_spent": total_spent,
+                "total_spent": int(total_spent),
                 "cashback": cashback,
             }
         )

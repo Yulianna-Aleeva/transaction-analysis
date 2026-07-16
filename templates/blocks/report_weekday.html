@@ -1,9 +1,12 @@
-<form method="POST" class="small-toggle">
-    <input type="hidden" name="custom_end" value="{{ custom_end }}">
-    <input type="hidden" name="hide_top7" value="{{ 'on' if hide_top7 else '' }}">
-    <input type="hidden" name="hide_top5" value="{{ 'on' if hide_top5 else '' }}">
-    <input type="hidden" name="hide_top3" value="{{ 'on' if hide_top3 else '' }}">
-    <input type="hidden" name="hide_workday" value="{{ 'on' if hide_workday else '' }}">
-    <input type="hidden" name="hide_weekday" value="{{ 'off' if hide_weekday else 'on' }}">
-    <button type="submit">{% if hide_weekday %}Показать переводы{% else %}Скрыть переводы{% endif %}</button>
-</form>
+<h3 style="margin:0 0 10px 0;">Расходы по дням недели
+  <button id="wd-btn" class="btn-hide" onclick="toggle('wd-w','wd-wo','wd-st','wd-btn','hwd')">Скрыть переводы</button>
+</h3>
+<div id="wd-w">
+  <table><tr><th>День</th><th>Сумма</th></tr>
+  {% for r in wd_with %}<tr><td>{{ r['День недели'] }}</td><td class="sum">{{ r['Итого расходов'] }}</td></tr>{% endfor %}</table>
+  <span id="wd-st" class="small sum"></span>
+</div>
+<div id="wd-wo" class="hidden">
+  <table><tr><th>День</th><th>Сумма</th></tr>
+  {% for r in wd_without %}<tr><td>{{ r['День недели'] }}</td><td class="sum">{{ r['Итого расходов'] }}</td></tr>{% endfor %}</table>
+</div>

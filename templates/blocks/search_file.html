@@ -1,23 +1,20 @@
-<form method="POST" style="display: flex; align-items: center; gap: 5px;">
-    <input type="hidden" name="hide_top7" value="{{ 'on' if hide_top7 else '' }}">
-    <input type="hidden" name="hide_top5" value="{{ 'on' if hide_top5 else '' }}">
-    <input type="hidden" name="hide_top3" value="{{ 'on' if hide_top3 else '' }}">
-    <input type="hidden" name="hide_weekday" value="{{ 'on' if hide_weekday else '' }}">
-    <input type="hidden" name="hide_workday" value="{{ 'on' if hide_workday else '' }}">
-    <input type="hidden" name="custom_end" value="{{ custom_end }}">
-    <input type="text" name="search" placeholder="ключевое слово">
-    <button type="submit">Искать</button>
-    {% if search_results %}<a href="/"><button type="button" class="clear-btn">Очистить</button></a>{% endif %}
-</form>
-{% if search_results %}
-    <div class="search-stats"><span>Найдено: {{ search_count }}</span><span>Сумма: {{ search_total }}</span></div>
-    <table class="search-results">
-        <tr><th>Дата</th><th>Сумма</th><th>Категория</th><th>Описание</th></tr>
-        {% for tx in search_results %}
-        <tr><td>{{ tx.date_operation }}</td><td class="amount-expense">{{ tx.amount_rub }}</td><td>{{ tx.category }}</td><td>{{ tx.description }}</td></tr>
-        {% endfor %}
-    </table>
-    <a href="/"><button class="clear-btn">Очистить</button></a>
-{% elif search_count == 0 and request.form.get('search') %}
-    <p>{{ messages['NOT_FOUND'] }}</p>
-{% endif %}
+<div class="block col-2">
+    <h3 style="margin:0 0 15px 0;">Поиск по файлу</h3>
+    <form method="POST" style="display:flex;align-items:center;gap:5px;">
+      <input type="hidden" name="custom_end" value="{{ custom_end }}">
+      <input type="text" name="search_query" placeholder="ключевое слово">
+      <button class="btn">Искать</button>
+      <button type="button" class="btn" style="background:#6c757d" onclick="clearBlock('s-block')">Очистить</button>
+    </form>
+    {% if s_res or s_empty %}
+    <div id="s-block" class="search-output" style="margin-top:10px;">
+      {% if s_empty %}<p>{{ s_empty }}</p>
+      {% else %}
+      <div class="summary"><span>Найдено: {{ s_cnt }}</span><span>Сумма: {{ s_sum }} ₽</span></div>
+      <table><tr><th>Дата</th><th>Сумма</th><th>Категория</th><th>Описание</th></tr>
+      {% for tx in s_res %}<tr><td>{{ tx.date_operation }}</td><td class="sum">{{ tx.amount_rub }}</td><td>{{ tx.category }}</td><td>{{ tx.description }}</td></tr>{% endfor %}</table>
+      {% endif %}
+      <div style="text-align:right;margin-top:8px;"><button class="btn" style="background:#6c757d" onclick="clearBlock('s-block')">Очистить</button></div>
+    </div>
+    {% endif %}
+</div>

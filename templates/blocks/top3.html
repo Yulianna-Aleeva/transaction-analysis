@@ -1,9 +1,15 @@
-<form method="POST" class="small-toggle">
-    <input type="hidden" name="custom_end" value="{{ custom_end }}">
-    <input type="hidden" name="hide_top7" value="{{ 'on' if hide_top7 else '' }}">
-    <input type="hidden" name="hide_top5" value="{{ 'on' if hide_top5 else '' }}">
-    <input type="hidden" name="hide_weekday" value="{{ 'on' if hide_weekday else '' }}">
-    <input type="hidden" name="hide_workday" value="{{ 'on' if hide_workday else '' }}">
-    <input type="hidden" name="hide_top3" value="{{ 'off' if hide_top3 else 'on' }}">
-    <button type="submit">{% if hide_top3 %}Показать переводы{% else %}Скрыть переводы{% endif %}</button>
-</form>
+<div class="block">
+  <h3 style="margin:0 0 15px 0;">Топ-3 кешбэк</h3>
+  <table style="margin-top:10px;">
+    <tr>
+      <th>Категория</th>
+      <th style="width:110px;" class="num">Кешбэк</th>
+    </tr>
+    {% for item in top3_with %}
+      <tr>
+        <td>{{ item.category }}</td>
+        <td class="cash">{{ item.cashback }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+</div>
