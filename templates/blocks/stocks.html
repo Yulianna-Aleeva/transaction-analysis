@@ -1,6 +1,6 @@
 <div class="block col-4">
     <h3 style="margin:0 0 15px 0;">Курсы акций на {{ current_date }}</h3>
     <table style="margin-top:10px;">
-      {% for s in stock_prices %}<tr><td>{{ s.stock }}</td><td class="sum">{{ s.price }}</td></tr>{% endfor %}
+      {% for s in stock_prices %}<tr><td>{{ s.stock }}</td><td class="sum">{{ s.price|format_rub }}</td></tr>{% endfor %}
     </table>
 </div>

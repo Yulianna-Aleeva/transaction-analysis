@@ -1,6 +1,6 @@
 <div class="block col-4">
     <h3 style="margin:0 0 15px 0;">Курсы валют на {{ current_date }}</h3>
     <table style="margin-top:10px;">
-      {% for c in currency_rates %}<tr><td>{{ c.currency }}</td><td class="sum">{{ c.rate }}</td></tr>{% endfor %}
+      {% for c in currency_rates %}<tr><td>{{ c.currency }}</td><td class="sum">{{ c.rate|format_rub }}</td></tr>{% endfor %}
     </table>
 </div>

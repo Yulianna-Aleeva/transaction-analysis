@@ -1,7 +1,6 @@
-from typing import Any, Dict, List, Optional, Tuple
-
 import re
 import time
+from typing import Any, Dict, List, Optional, Tuple
 
 import pandas as pd
 from flask import Request
@@ -134,7 +133,7 @@ def build_dashboard_context(df: pd.DataFrame, request: Request) -> Dict[str, Any
     ps = pe = ""
     no_data = ""
     if df_rep.empty:
-        no_data = MESSAGES.NO_PERIOD
+        no_data = MESSAGES["NO_PERIOD"]
     else:
         ps = df_rep["date_operation"].min().strftime("%d.%m.%Y")
         pe = df_rep["date_operation"].max().strftime("%d.%m.%Y")
@@ -154,42 +153,46 @@ def build_dashboard_context(df: pd.DataFrame, request: Request) -> Dict[str, Any
         if f.get("search_query", "").strip():
             r = simple_search(df, f.get("search_query").strip())
             if r.empty:
-                s_empty = MESSAGES.NOT_FOUND
+                s_empty = MESSAGES["NOT_FOUND"]
             else:
                 s_list, s_cnt, s_sum = _to_records(r)
         if "phone_all" in f:
             r = search_phone_numbers(df)
             p_list, p_cnt, p_sum = _to_records(r) if not r.empty else ([], 0, 0)
             if r.empty:
-                p_empty = MESSAGES.NO_DATA
+                p_empty = MESSAGES["NO_DATA"]
         if f.get("phone_query", "").strip():
             q = f.get("phone_query").strip()
             core = _phone_core(q)
             if not core:
-                p_err = MESSAGES.PHONE_INVALID
+                p_err = MESSAGES["PHONE_INVALID"]
             else:
                 dd = df["description"].astype(str).apply(lambda x: re.sub(r"\D", "", x))
                 r = df[dd.str.contains(core, na=False)]
                 if r.empty:
-                    p_empty = MESSAGES.NO_DATA
+                    p_empty = MESSAGES["NO_DATA"]
                 else:
                     p_list, p_cnt, p_sum = _to_records(r)
         if "fl_all" in f:
             r = search_transfers(df)
             f_list, f_cnt, f_sum = _to_records(r) if not r.empty else ([], 0, 0)
             if r.empty:
-                f_empty = MESSAGES.NO_DATA
+                f_empty = MESSAGES["NO_DATA"]
         if f.get("fl_query", "").strip():
             base = search_transfers(df)
             r = base[base["description"].astype(str).str.contains(f.get("fl_query").strip(), case=False, na=False)]
             if r.empty:
-                f_empty = MESSAGES.NOT_FOUND
+                f_empty = MESSAGES["NOT_FOUND"]
             else:
                 f_list, f_cnt, f_sum = _to_records(r)
 
     df_no = df_rep[~df_rep["category"].str.contains("Перевод", case=False, na=False)] if not df_rep.empty else df_rep
     cards = get_cards_info(df_rep)
-    inc = df_rep[df_rep["amount_rub"] > 0].groupby("card_number")["amount_rub"].sum().reset_index() if not df_rep.empty else pd.DataFrame()
+    inc = (
+        df_rep[df_rep["amount_rub"] > 0].groupby("card_number")["amount_rub"].sum().reset_index()
+        if not df_rep.empty
+        else pd.DataFrame()
+    )
     inc_d: Dict[str, float] = {}
     if not inc.empty:
         inc["last_digits"] = inc["card_number"].astype(str).str.replace("*", "").str[-4:]
@@ -200,15 +203,33 @@ def build_dashboard_context(df: pd.DataFrame, request: Request) -> Dict[str, Any
         c["cashback"] = int(round(abs(c["cashback"])))
 
     return dict(
-        period_start=ps, period_end=pe, custom_end=custom_end, no_data=no_data,
-        s_res=s_list, s_cnt=s_cnt, s_sum=s_sum, s_empty=s_empty,
-        p_res=p_list, p_cnt=p_cnt, p_sum=p_sum, p_err=p_err, p_empty=p_empty,
-        f_res=f_list, f_cnt=f_cnt, f_sum=f_sum, f_empty=f_empty,
-        top7_with=_top7(df_rep), top7_without=_top7(df_no),
-        top5_with=_top5(df_rep), top5_without=_top5(df_no),
-        top3_with=_top_cash(df_rep), top3_without=_top_cash(df_no),
+        period_start=ps,
+        period_end=pe,
+        custom_end=custom_end,
+        no_data=no_data,
+        s_res=s_list,
+        s_cnt=s_cnt,
+        s_sum=s_sum,
+        s_empty=s_empty,
+        p_res=p_list,
+        p_cnt=p_cnt,
+        p_sum=p_sum,
+        p_err=p_err,
+        p_empty=p_empty,
+        f_res=f_list,
+        f_cnt=f_cnt,
+        f_sum=f_sum,
+        f_empty=f_empty,
+        top7_with=_top7(df_rep),
+        top7_without=_top7(df_no),
+        top5_with=_top5(df_rep),
+        top5_without=_top5(df_no),
+        top3_with=_top_cash(df_rep),
+        top3_without=_top_cash(df_no),
         cat_rep=_proc(expenses_by_category(df_rep)),
-        wd_with=_proc(expenses_by_weekday(df_rep)), wd_without=_proc(expenses_by_weekday(df_no)),
-        ww_with=_proc(expenses_work_vs_weekend(df_rep)), ww_without=_proc(expenses_work_vs_weekend(df_no)),
+        wd_with=_proc(expenses_by_weekday(df_rep)),
+        wd_without=_proc(expenses_by_weekday(df_no)),
+        ww_with=_proc(expenses_work_vs_weekend(df_rep)),
+        ww_without=_proc(expenses_work_vs_weekend(df_no)),
         cards=cards,
     )
