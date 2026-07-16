@@ -166,6 +166,7 @@ def build_dashboard_context(df: pd.DataFrame, request: Request) -> Dict[str, Any
             core = _phone_core(q)
             if not core:
                 p_err = MESSAGES["PHONE_INVALID"]
+                p_list, p_cnt, p_sum, p_empty = [], 0, 0, ""
             else:
                 dd = df["description"].astype(str).apply(lambda x: re.sub(r"\D", "", x))
                 r = df[dd.str.contains(core, na=False)]

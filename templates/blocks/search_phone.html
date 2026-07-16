@@ -8,7 +8,7 @@
     <button type="button" class="btn" style="background:#6c757d" onclick="clearBlock('p-block')">Очистить</button>
   </form>
   {% if p_err %}<p class="sum">{{ p_err }}</p>{% endif %}
-  {% if p_res or p_empty %}
+  {% if not p_err and (p_res or p_empty) %}
   <div id="p-block" class="search-output" style="margin-top:10px;">
     {% if p_empty %}<p>{{ p_empty }}</p>
     {% else %}
