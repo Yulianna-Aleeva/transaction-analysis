@@ -21,7 +21,7 @@ from src.services.search_services import (
 )
 from src.utils.data_loader import load_transaction
 from src.utils.filters_utils import filter_last_3_months
-from src.utils.format_utils import format_rub_rounded
+from src.utils.format_utils import format_rub, format_rub_rounded
 from src.views import get_cards_info
 
 logger = get_logger(__name__)
@@ -45,22 +45,30 @@ def cached_currency() -> List[Dict[str, Any]]:
     """Кэш валют 1 час."""
     if _CACHE["cur"]["d"] is None or time.time() - _CACHE["cur"]["t"] > 3600:
         try:
-            _CACHE["cur"]["d"] = get_currency_rates()
+            data = get_currency_rates()
+            for c in data:
+                c["rate"] = format_rub(c["rate"])
+            _CACHE["cur"]["d"] = data
         except Exception:
             _CACHE["cur"]["d"] = []
         _CACHE["cur"]["t"] = time.time()
-    return _CACHE["cur"]["d"]
+    result: List[Dict[str, Any]] = _CACHE["cur"]["d"]
+    return result
 
 
 def cached_stocks() -> List[Dict[str, Any]]:
     """Кэш акций 1 час."""
     if _CACHE["stock"]["d"] is None or time.time() - _CACHE["stock"]["t"] > 3600:
         try:
-            _CACHE["stock"]["d"] = get_stock_prices()
+            data = get_stock_prices()
+            for s in data:
+                s["price"] = format_rub(s["price"])
+            _CACHE["stock"]["d"] = data
         except Exception:
             _CACHE["stock"]["d"] = []
         _CACHE["stock"]["t"] = time.time()
-    return _CACHE["stock"]["d"]
+    result: List[Dict[str, Any]] = _CACHE["stock"]["d"]
+    return result
 
 
 def _to_records(df: pd.DataFrame) -> Tuple[List[Dict[str, Any]], int, int]:
@@ -70,7 +78,8 @@ def _to_records(df: pd.DataFrame) -> Tuple[List[Dict[str, Any]], int, int]:
     dc = df.copy()
     dc["date_operation"] = pd.to_datetime(dc["date_operation"]).dt.strftime("%d.%m.%Y")
     dc["amount_rub"] = dc["amount_rub"].abs().round(0).astype(int)
-    return dc.to_dict(orient="records"), len(df), int(abs(df["amount_rub"].sum()))
+    records: List[Dict[str, Any]] = [{str(k): v for k, v in r.items()} for r in dc.to_dict(orient="records")]
+    return records, len(df), int(abs(df["amount_rub"].sum()))
 
 
 def _fmt_int(x: Any) -> str:
@@ -130,7 +139,8 @@ def _proc(df: pd.DataFrame) -> List[Dict[str, Any]]:
     dc = df.copy()
     for col in dc.select_dtypes(include="number").columns:
         dc[col] = dc[col].abs().map(_fmt_int)
-    return dc.to_dict(orient="records")
+    records: List[Dict[str, Any]] = [{str(k): v for k, v in r.items()} for r in dc.to_dict(orient="records")]
+    return records
 
 
 def build_dashboard_context(df: pd.DataFrame, request: Request) -> Dict[str, Any]:
@@ -160,7 +170,7 @@ def build_dashboard_context(df: pd.DataFrame, request: Request) -> Dict[str, Any
     if request.method == "POST":
         f = request.form
         if f.get("search_query", "").strip():
-            r = simple_search(df, f.get("search_query").strip())
+            r = simple_search(df, f.get("search_query", "").strip())
             if r.empty:
                 s_empty = MESSAGES["NOT_FOUND"]
             else:
@@ -171,7 +181,7 @@ def build_dashboard_context(df: pd.DataFrame, request: Request) -> Dict[str, Any
             if r.empty:
                 p_empty = MESSAGES["NO_DATA"]
         if f.get("phone_query", "").strip():
-            q = f.get("phone_query").strip()
+            q = f.get("phone_query", "").strip()
             core = _phone_core(q)
             if not core:
                 p_err = MESSAGES["PHONE_INVALID"]
@@ -190,7 +200,7 @@ def build_dashboard_context(df: pd.DataFrame, request: Request) -> Dict[str, Any
                 f_empty = MESSAGES["NO_DATA"]
         if f.get("fl_query", "").strip():
             base = search_transfers(df)
-            r = base[base["description"].astype(str).str.contains(f.get("fl_query").strip(), case=False, na=False)]
+            r = base[base["description"].astype(str).str.contains(f.get("fl_query", "").strip(), case=False, na=False)]
             if r.empty:
                 f_empty = MESSAGES["NOT_FOUND"]
             else:
