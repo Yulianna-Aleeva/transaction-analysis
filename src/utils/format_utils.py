@@ -42,3 +42,9 @@ def format_rub(amount: Any) -> str:
     if pd.isna(amount) or amount is None:
         return "0,00"
     return f"{float(amount):,.2f}".replace(",", " ").replace(".", ",")
+
+
+def format_rub_rounded(amount: Any) -> str:
+    if pd.isna(amount) or amount is None:
+        return "0"
+    return f"{float(amount):,.0f}".replace(",", " ").replace(".", ",")

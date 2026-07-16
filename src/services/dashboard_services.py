@@ -21,6 +21,7 @@ from src.services.search_services import (
 )
 from src.utils.data_loader import load_transaction
 from src.utils.filters_utils import filter_last_3_months
+from src.utils.format_utils import format_rub_rounded
 from src.views import get_cards_info
 
 logger = get_logger(__name__)
@@ -72,6 +73,13 @@ def _to_records(df: pd.DataFrame) -> Tuple[List[Dict[str, Any]], int, int]:
     return dc.to_dict(orient="records"), len(df), int(abs(df["amount_rub"].sum()))
 
 
+def _fmt_int(x: Any) -> str:
+    """Форматирует целую сумму: X XXX XXX."""
+    if x is None or pd.isna(x):
+        return "0"
+    return f"{int(round(float(x))):,}".replace(",", " ")
+
+
 def _phone_core(q: str) -> Optional[str]:
     """Валидация телефона: 10 цифр или 11 с 7/8."""
     d = re.sub(r"\D", "", q)
@@ -89,9 +97,9 @@ def _top7(df: pd.DataFrame) -> List[Dict[str, Any]]:
     s = df[df["amount_rub"] < 0].groupby("category")["amount_rub"].sum().abs().sort_values(ascending=False)
     top = s.head(7)
     rest = s.iloc[7:].sum() if len(s) > 7 else 0
-    r = [{"category": c, "amount": int(round(v))} for c, v in top.items()]
+    r = [{"category": c, "amount": format_rub_rounded(v)} for c, v in top.items()]
     if rest > 0:
-        r.append({"category": "Остальное", "amount": int(round(rest))})
+        r.append({"category": "Остальное", "amount": format_rub_rounded(rest)})
     return r
 
 
@@ -101,7 +109,7 @@ def _top5(df: pd.DataFrame) -> List[Dict[str, Any]]:
         return []
     e = df[df["amount_rub"] < 0].sort_values("amount_rub").head(5)
     return [
-        {"date": d.strftime("%d.%m.%Y"), "amount": int(round(abs(a))), "category": c}
+        {"date": d.strftime("%d.%m.%Y"), "amount": format_rub_rounded(abs(a)), "category": c}
         for d, a, c in zip(e["date_operation"], e["amount_rub"], e["category"])
     ]
 
@@ -112,16 +120,17 @@ def _top_cash(df: pd.DataFrame) -> List[Dict[str, Any]]:
         return []
     s = df.groupby("category")["cashback"].sum()
     s = s[s > 0].sort_values(ascending=False).head(3)
-    return [{"category": c, "cashback": int(round(v))} for c, v in s.items()]
+    return [{"category": c, "cashback": format_rub_rounded(v)} for c, v in s.items()]
 
 
 def _proc(df: pd.DataFrame) -> List[Dict[str, Any]]:
-    """Приводит отчёт к целым суммам."""
+    """Форматирует все числовые колонки отчёта через _fmt_int."""
     if df.empty:
         return []
-    if "Итого расходов" in df.columns:
-        df["Итого расходов"] = df["Итого расходов"].abs().round(0).astype(int)
-    return df.to_dict(orient="records")
+    dc = df.copy()
+    for col in dc.select_dtypes(include="number").columns:
+        dc[col] = dc[col].abs().map(_fmt_int)
+    return dc.to_dict(orient="records")
 
 
 def build_dashboard_context(df: pd.DataFrame, request: Request) -> Dict[str, Any]:
@@ -199,9 +208,9 @@ def build_dashboard_context(df: pd.DataFrame, request: Request) -> Dict[str, Any
         inc["last_digits"] = inc["card_number"].astype(str).str.replace("*", "").str[-4:]
         inc_d = dict(zip(inc["last_digits"], inc["amount_rub"]))
     for c in cards:
-        c["total_income"] = int(round(abs(inc_d.get(c["last_digits"], 0))))
-        c["total_spent"] = int(round(abs(c["total_spent"])))
-        c["cashback"] = int(round(abs(c["cashback"])))
+        c["total_income"] = format_rub_rounded(abs(inc_d.get(c["last_digits"], 0)))
+        c["total_spent"] = format_rub_rounded(abs(c["total_spent"]))
+        c["cashback"] = format_rub_rounded(abs(c["cashback"]))
 
     return dict(
         period_start=ps,
