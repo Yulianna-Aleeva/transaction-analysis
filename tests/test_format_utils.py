@@ -1,15 +1,15 @@
 from datetime import datetime
 from unittest.mock import patch
 
+import numpy as np
 import pandas as pd
 import pytest
 
-from src.utils.format_utils import (
-    convert_to_rub,
-    current_date,
-    format_rub,
-    greeting_time,
-)
+from src.utils.format_utils import convert_to_rub
+from src.utils.format_utils import current_date
+from src.utils.format_utils import format_rub
+from src.utils.format_utils import format_rub_rounded
+from src.utils.format_utils import greeting_time
 
 MODULE_PATH = "src.utils.format_utils"
 
@@ -77,3 +77,36 @@ def test_format_rub_empty() -> None:
     import numpy as np
 
     assert format_rub(np.nan) == "0,00"
+
+
+def test_format_rub_rounded_normal() -> None:
+    """Проверка обычных положительных значений и округления."""
+    assert format_rub_rounded(1234.56) == "1 235"
+    assert format_rub_rounded(0) == "0"
+    assert format_rub_rounded(999.4) == "999"
+    assert format_rub_rounded(999.5) == "1 000"
+
+
+def test_format_rub_rounded_none_and_na() -> None:
+    """Проверка обработки отсутствующих/невалидных значений."""
+    assert format_rub_rounded(None) == "0"
+    assert format_rub_rounded(pd.NA) == "0"
+    assert format_rub_rounded(np.nan) == "0"
+    assert format_rub_rounded(pd.NaT) == "0"
+
+
+def test_format_rub_rounded_string_number() -> None:
+    """Проверка передачи числа в виде строки."""
+    assert format_rub_rounded("1234.56") == "1 235"
+    assert format_rub_rounded("0") == "0"
+
+
+def test_format_rub_rounded_negative() -> None:
+    """Проверка отрицательных значений, включая случай округления до нуля."""
+    assert format_rub_rounded(-1234.56) == "-1 235"
+    assert format_rub_rounded(-0.1) == "0"
+
+
+def test_format_rub_rounded_large_number() -> None:
+    """Проверка больших чисел."""
+    assert format_rub_rounded(1_234_567.89) == "1 234 568"

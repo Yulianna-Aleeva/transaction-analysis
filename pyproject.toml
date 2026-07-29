@@ -40,7 +40,8 @@ line-length = 119
 [tool.isort]
 profile = "black"
 float_to_top = true
-combine_as_imports = true
+#combine_as_imports = true
+force_single_line = true
 
 [tool.flake8]
 max-line-length = 119

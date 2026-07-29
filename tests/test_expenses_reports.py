@@ -4,11 +4,9 @@ from typing import Generator
 import pandas as pd
 import pytest
 
-from src.reports.expenses_reports import (
-    expenses_by_category,
-    expenses_by_weekday,
-    expenses_work_vs_weekend,
-)
+from src.reports.expenses_reports import expenses_by_category
+from src.reports.expenses_reports import expenses_by_weekday
+from src.reports.expenses_reports import expenses_work_vs_weekend
 
 
 @pytest.fixture(autouse=True)

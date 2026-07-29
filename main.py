@@ -5,16 +5,16 @@ import pandas as pd
 from src.api.api_currency import get_currency_rates
 from src.api.api_stocks import get_stock_prices
 from src.logs.log_config import DATA_FILE
-from src.reports.expenses_reports import (
-    expenses_by_category,
-    expenses_by_weekday,
-    expenses_work_vs_weekend,
-)
+from src.reports.expenses_reports import expenses_by_category
+from src.reports.expenses_reports import expenses_by_weekday
+from src.reports.expenses_reports import expenses_work_vs_weekend
 from src.services.rewards_and_savings import top_cashback_categories
 from src.services.search_services import simple_search
 from src.utils.data_loader import load_transaction
-from src.utils.filters_utils import filter_last_3_months, get_top_positions
-from src.utils.format_utils import current_date, greeting_time
+from src.utils.filters_utils import filter_last_3_months
+from src.utils.filters_utils import get_top_positions
+from src.utils.format_utils import current_date
+from src.utils.format_utils import greeting_time
 from src.views import get_main_page_data
 
 # === ПРОВЕРКА КОДА ===

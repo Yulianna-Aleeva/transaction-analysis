@@ -3,11 +3,9 @@ from datetime import datetime
 import pandas as pd
 import pytest
 
-from src.utils.filters_utils import (
-    filter_last_3_months,
-    get_top_positions,
-    sort_df_by_column,
-)
+from src.utils.filters_utils import filter_last_3_months
+from src.utils.filters_utils import get_top_positions
+from src.utils.filters_utils import sort_df_by_column
 
 
 @pytest.fixture

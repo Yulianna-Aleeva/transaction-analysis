@@ -1,13 +1,15 @@
-from flask import Flask, render_template, request
+from flask import Flask
+from flask import render_template
+from flask import request
 
 from src.constants import MESSAGES
-from src.services.dashboard_services import (
-    build_dashboard_context,
-    cached_currency,
-    cached_stocks,
-    get_initial_dataframe,
-)
-from src.utils.format_utils import current_date, format_rub, greeting_time
+from src.services.dashboard_services import build_dashboard_context
+from src.services.dashboard_services import cached_currency
+from src.services.dashboard_services import cached_stocks
+from src.services.dashboard_services import get_initial_dataframe
+from src.utils.format_utils import current_date
+from src.utils.format_utils import format_rub
+from src.utils.format_utils import greeting_time
 
 app = Flask(__name__)
 app.jinja_env.filters["format_rub"] = format_rub
