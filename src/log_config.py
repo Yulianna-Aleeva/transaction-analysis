@@ -13,6 +13,7 @@ BASE_DIR = Path(__file__).resolve().parents[1]  # корень проекта
 LOG_DIR = BASE_DIR / "src" / "logs"
 LOG_DIR.mkdir(exist_ok=True)
 
+
 DATA_FILE = os.getenv(
     "DATA_FILE",
     str(BASE_DIR / "data" / "operations.xlsx"),

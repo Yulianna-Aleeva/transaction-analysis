@@ -9,6 +9,7 @@ from typing import Tuple
 import pandas as pd
 from flask import Request
 
+from src.api.api_currency import get_all_currency_rates
 from src.api.api_currency import get_currency_rates
 from src.api.api_stocks import get_stock_prices
 from src.constants import MESSAGES
@@ -30,6 +31,7 @@ logger = get_logger(__name__)
 _DF: Optional[pd.DataFrame] = None
 _CACHE: Dict[str, Dict[str, Any]] = {
     "cur": {"d": None, "t": 0},
+    "cur_all": {"d": None, "t": 0},
     "stock": {"d": None, "t": 0},
 }
 
@@ -52,6 +54,19 @@ def cached_currency() -> List[Dict[str, Any]]:
             _CACHE["cur"]["d"] = []
         _CACHE["cur"]["t"] = time.time()
     result: List[Dict[str, Any]] = _CACHE["cur"]["d"]
+    return result
+
+
+def cached_all_currency() -> List[Dict[str, Any]]:
+    """Кэш всех валют 1 час."""
+    if _CACHE["cur_all"]["d"] is None or time.time() - _CACHE["cur_all"]["t"] > 3600:
+        try:
+            data = get_all_currency_rates()
+            _CACHE["cur_all"]["d"] = [{"currency": code, "rate": rate} for code, rate in data.items()]
+        except Exception:
+            _CACHE["cur_all"]["d"] = []
+        _CACHE["cur_all"]["t"] = time.time()
+    result: List[Dict[str, Any]] = _CACHE["cur_all"]["d"]
     return result
 
 
