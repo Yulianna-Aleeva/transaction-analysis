@@ -4,6 +4,7 @@ from flask import request
 
 from src.constants import MESSAGES
 from src.services.dashboard_services import build_dashboard_context
+from src.services.dashboard_services import cached_all_currency
 from src.services.dashboard_services import cached_currency
 from src.services.dashboard_services import cached_stocks
 from src.services.dashboard_services import get_initial_dataframe
@@ -18,21 +19,17 @@ DF = get_initial_dataframe()
 
 @app.route("/", methods=["GET", "POST"])
 def index() -> str:
-    try:
-        ctx = build_dashboard_context(DF, request)
-        ctx.update(
-            currency_rates=cached_currency(),
-            stock_prices=cached_stocks(),
-            greeting=greeting_time(),
-            current_date=current_date(),
-            MESSAGES=MESSAGES,
-        )
-        return render_template("index.html", **ctx)
-    except Exception as e:
-        return render_template(
-            "index.html", error=str(e), MESSAGES=MESSAGES, greeting=greeting_time(), current_date=current_date()
-        )
+    ctx = build_dashboard_context(DF, request)
+    ctx.update(
+        currency_rates=cached_currency(),
+        all_currency_rates=cached_all_currency(),
+        stock_prices=cached_stocks(),
+        greeting=greeting_time(),
+        current_date=current_date(),
+        MESSAGES=MESSAGES,
+    )
+    return render_template("index.html", **ctx)
 
 
 if __name__ == "__main__":
-    app.run(debug=False, threaded=True)
+    app.run(debug=True, threaded=True)

@@ -3,8 +3,8 @@ from functools import lru_cache
 import pandas as pd
 
 from src.api.api_currency import get_all_currency_rates
-from src.logs.log_config import DATA_FILE
-from src.logs.log_config import get_logger
+from src.log_config import DATA_FILE
+from src.log_config import get_logger
 from src.utils.format_utils import convert_to_rub
 from src.utils.format_utils import format_rub
 

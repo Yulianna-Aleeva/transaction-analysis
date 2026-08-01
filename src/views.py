@@ -7,7 +7,7 @@ import pandas as pd
 
 from src.api.api_currency import get_currency_rates
 from src.api.api_stocks import get_stock_prices
-from src.logs.log_config import get_logger
+from src.log_config import get_logger
 from src.utils.format_utils import greeting_time
 
 logger = get_logger(__name__)

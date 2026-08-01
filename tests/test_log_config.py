@@ -4,7 +4,7 @@ from pathlib import Path
 
 from _pytest.monkeypatch import MonkeyPatch
 
-from src.logs import log_config
+from src import log_config
 
 
 def clear_logger_handlers(logger_name: str) -> None:

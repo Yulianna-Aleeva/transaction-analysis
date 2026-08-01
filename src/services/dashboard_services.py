@@ -9,11 +9,12 @@ from typing import Tuple
 import pandas as pd
 from flask import Request
 
+from src.api.api_currency import get_all_currency_rates
 from src.api.api_currency import get_currency_rates
 from src.api.api_stocks import get_stock_prices
 from src.constants import MESSAGES
-from src.logs.log_config import DATA_FILE
-from src.logs.log_config import get_logger
+from src.log_config import DATA_FILE
+from src.log_config import get_logger
 from src.reports.expenses_reports import expenses_by_category
 from src.reports.expenses_reports import expenses_by_weekday
 from src.reports.expenses_reports import expenses_work_vs_weekend
@@ -22,7 +23,6 @@ from src.services.search_services import search_transfers
 from src.services.search_services import simple_search
 from src.utils.data_loader import load_transaction
 from src.utils.filters_utils import filter_last_3_months
-from src.utils.format_utils import format_rub
 from src.utils.format_utils import format_rub_rounded
 from src.views import get_cards_info
 
@@ -31,6 +31,7 @@ logger = get_logger(__name__)
 _DF: Optional[pd.DataFrame] = None
 _CACHE: Dict[str, Dict[str, Any]] = {
     "cur": {"d": None, "t": 0},
+    "cur_all": {"d": None, "t": 0},
     "stock": {"d": None, "t": 0},
 }
 
@@ -48,8 +49,6 @@ def cached_currency() -> List[Dict[str, Any]]:
     if _CACHE["cur"]["d"] is None or time.time() - _CACHE["cur"]["t"] > 3600:
         try:
             data = get_currency_rates()
-            for c in data:
-                c["rate"] = format_rub(c["rate"])
             _CACHE["cur"]["d"] = data
         except Exception:
             _CACHE["cur"]["d"] = []
@@ -58,13 +57,24 @@ def cached_currency() -> List[Dict[str, Any]]:
     return result
 
 
+def cached_all_currency() -> List[Dict[str, Any]]:
+    """Кэш всех валют 1 час."""
+    if _CACHE["cur_all"]["d"] is None or time.time() - _CACHE["cur_all"]["t"] > 3600:
+        try:
+            data = get_all_currency_rates()
+            _CACHE["cur_all"]["d"] = [{"currency": code, "rate": rate} for code, rate in data.items()]
+        except Exception:
+            _CACHE["cur_all"]["d"] = []
+        _CACHE["cur_all"]["t"] = time.time()
+    result: List[Dict[str, Any]] = _CACHE["cur_all"]["d"]
+    return result
+
+
 def cached_stocks() -> List[Dict[str, Any]]:
     """Кэш акций 1 час."""
     if _CACHE["stock"]["d"] is None or time.time() - _CACHE["stock"]["t"] > 3600:
         try:
             data = get_stock_prices()
-            for s in data:
-                s["price"] = format_rub(s["price"])
             _CACHE["stock"]["d"] = data
         except Exception:
             _CACHE["stock"]["d"] = []

@@ -4,7 +4,7 @@ import pandas as pd
 
 from src.api.api_currency import get_currency_rates
 from src.api.api_stocks import get_stock_prices
-from src.logs.log_config import DATA_FILE
+from src.log_config import DATA_FILE
 from src.reports.expenses_reports import expenses_by_category
 from src.reports.expenses_reports import expenses_by_weekday
 from src.reports.expenses_reports import expenses_work_vs_weekend
