@@ -12,7 +12,9 @@
 * SSH
 > git@github.com:Yulianna-Aleeva/transaction-analysis.git
 2. Установите зависимости:
-> poetry install
+```sh
+poetry install
+```
 
 
 ## Запуск:
@@ -22,11 +24,10 @@
 * Вы можете указать свои валюты и акции в [пользовательских настройках](user_settings.json).
 > По умолчанию установлены курсы валют и акции:
 >> "CNY", "USD", "EUR" и "AAPL", "AMZN", "GOOGL", "MSFT", "TSLA"
-* Запустите консольный режим (проверка всех функций):
-> python main.py
-* Для запуска веб-версии (Flask):
-> python app.py
->> _Выход: CTRL+C_
+* Запустите консольный режим (проверка всех функций):  
+> `python main.py`
+* Для запуска веб-версии (Flask):  
+> `python app.py` → `*Выход: CTRL+C`
 * Перейдите по ссылке в браузер:
 > http://127.0.0.1:5000
 
