@@ -8,8 +8,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-BASE_DIR = Path(__file__).resolve().parents[2]  # корень проекта
-LOG_DIR = Path(__file__).resolve().parent  # сейчас: src/logs
+BASE_DIR = Path(__file__).resolve().parents[1]  # корень проекта
+# LOG_DIR = Path(__file__).resolve().parent  # сейчас: src/logs
+LOG_DIR = BASE_DIR / "src" / "logs"
 LOG_DIR.mkdir(exist_ok=True)
 
 DATA_FILE = os.getenv(

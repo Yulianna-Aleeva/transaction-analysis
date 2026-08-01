@@ -2,7 +2,7 @@ from datetime import datetime
 
 import pandas as pd
 
-from src.logs.log_config import get_logger
+from src.log_config import get_logger
 
 logger = get_logger(__name__)
 

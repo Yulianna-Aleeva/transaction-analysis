@@ -12,8 +12,8 @@ from flask import Request
 from src.api.api_currency import get_currency_rates
 from src.api.api_stocks import get_stock_prices
 from src.constants import MESSAGES
-from src.logs.log_config import DATA_FILE
-from src.logs.log_config import get_logger
+from src.log_config import DATA_FILE
+from src.log_config import get_logger
 from src.reports.expenses_reports import expenses_by_category
 from src.reports.expenses_reports import expenses_by_weekday
 from src.reports.expenses_reports import expenses_work_vs_weekend
@@ -22,7 +22,6 @@ from src.services.search_services import search_transfers
 from src.services.search_services import simple_search
 from src.utils.data_loader import load_transaction
 from src.utils.filters_utils import filter_last_3_months
-from src.utils.format_utils import format_rub
 from src.utils.format_utils import format_rub_rounded
 from src.views import get_cards_info
 
@@ -48,8 +47,6 @@ def cached_currency() -> List[Dict[str, Any]]:
     if _CACHE["cur"]["d"] is None or time.time() - _CACHE["cur"]["t"] > 3600:
         try:
             data = get_currency_rates()
-            for c in data:
-                c["rate"] = format_rub(c["rate"])
             _CACHE["cur"]["d"] = data
         except Exception:
             _CACHE["cur"]["d"] = []
@@ -63,8 +60,6 @@ def cached_stocks() -> List[Dict[str, Any]]:
     if _CACHE["stock"]["d"] is None or time.time() - _CACHE["stock"]["t"] > 3600:
         try:
             data = get_stock_prices()
-            for s in data:
-                s["price"] = format_rub(s["price"])
             _CACHE["stock"]["d"] = data
         except Exception:
             _CACHE["stock"]["d"] = []
